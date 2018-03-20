@@ -29,5 +29,5 @@ WildFly 11 subsystem configuration:
                </external-context>
            </bindings>
            <remote-naming/>
-       </subsystem>
+</subsystem>
 ```
