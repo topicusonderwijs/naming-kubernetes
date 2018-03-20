@@ -25,6 +25,14 @@
 
 	<inceptionYear>2018</inceptionYear>
 
+	<properties>
+		<jetcd.version>0.0.2</jetcd.version>
+		<grpc.version>1.10.0</grpc.version>
+		<netty.version>4.1.22.Final</netty.version>
+		<opencensus.version>0.11.1</opencensus.version>
+		<protobuf.version>3.5.1</protobuf.version>
+	</properties>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -36,29 +44,135 @@
 			</dependency>
 			<dependency>
 				<groupId>com.coreos</groupId>
+				<artifactId>jetcd-common</artifactId>
+				<version>${jetcd.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.coreos</groupId>
 				<artifactId>jetcd-core</artifactId>
-				<version>0.0.1</version>
+				<version>${jetcd.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.coreos</groupId>
+				<artifactId>jetcd-resolver</artifactId>
+				<version>${jetcd.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.api.grpc</groupId>
+				<artifactId>proto-google-common-protos</artifactId>
+				<version>1.0.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-java</artifactId>
+				<version>${protobuf.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-java-util</artifactId>
+				<version>${protobuf.version}</version>
+			</dependency>	
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-context</artifactId>
+				<version>${grpc.version}</version>
+			</dependency>			
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-core</artifactId>
+				<version>${grpc.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.google.code.findbugs</groupId>
+						<artifactId>jsr305</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>io.grpc</groupId>
 				<artifactId>grpc-netty</artifactId>
-				<version>1.10.0</version>
+				<version>${grpc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-protobuf</artifactId>
+				<version>${grpc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-protobuf-lite</artifactId>
+				<version>${grpc.version}</version>
+			</dependency>			
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-stub</artifactId>
+				<version>${grpc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-buffer</artifactId>
+				<version>${netty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-codec</artifactId>
+				<version>${netty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-codec-http</artifactId>
+				<version>${netty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.netty</groupId>
 				<artifactId>netty-codec-http2</artifactId>
-				<version>4.1.22.Final</version>
+				<version>${netty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-codec-socks</artifactId>
+				<version>${netty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-common</artifactId>
+				<version>${netty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-handler</artifactId>
+				<version>${netty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.netty</groupId>
 				<artifactId>netty-handler-proxy</artifactId>
-				<version>4.1.22.Final</version>
+				<version>${netty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-resolver</artifactId>
+				<version>${netty.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.netty</groupId>
 				<artifactId>netty-tcnative-boringssl-static</artifactId>
 				<version>2.0.7.Final</version>
 				<classifier>linux-x86_64</classifier>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-transport</artifactId>
+				<version>${netty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.opencensus</groupId>
+				<artifactId>opencensus-api</artifactId>
+				<version>${opencensus.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.opencensus</groupId>
+				<artifactId>opencensus-contrib-grpc-metrics</artifactId>
+				<version>${opencensus.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
