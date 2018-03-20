@@ -1,6 +1,6 @@
 # naming-etcd
 
-A Java naming context for WildFly using etcd3 as backend for key lookups.
+A Java naming context for [WildFly](http://wildfly.org/) using [etcd3](https://coreos.com/etcd/) as backend for key lookups.
 
 ## Configuration
 WildFly 11 module configuration (modules/nl/topicus/naming/etcd/main/module.xml):
