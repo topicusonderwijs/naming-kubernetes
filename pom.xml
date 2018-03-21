@@ -71,12 +71,12 @@
 				<groupId>com.google.protobuf</groupId>
 				<artifactId>protobuf-java-util</artifactId>
 				<version>${protobuf.version}</version>
-			</dependency>	
+			</dependency>
 			<dependency>
 				<groupId>io.grpc</groupId>
 				<artifactId>grpc-context</artifactId>
 				<version>${grpc.version}</version>
-			</dependency>			
+			</dependency>
 			<dependency>
 				<groupId>io.grpc</groupId>
 				<artifactId>grpc-core</artifactId>
@@ -102,7 +102,7 @@
 				<groupId>io.grpc</groupId>
 				<artifactId>grpc-protobuf-lite</artifactId>
 				<version>${grpc.version}</version>
-			</dependency>			
+			</dependency>
 			<dependency>
 				<groupId>io.grpc</groupId>
 				<artifactId>grpc-stub</artifactId>
@@ -197,4 +197,36 @@
 		</dependency>
 	</dependencies>
 
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<configuration>
+						<rules>
+							<banDuplicateClasses>
+								<dependencies>
+									<dependency>
+										<groupId>com.coreos</groupId>
+										<artifactId>jetcd-core</artifactId>
+										<ignoreClasses>
+											<ignoreClass>com.coreos.jetcd.common.exception.*</ignoreClass>
+										</ignoreClasses>
+									</dependency>
+									<dependency>
+										<groupId>com.coreos</groupId>
+										<artifactId>jetcd-core</artifactId>
+										<ignoreClasses>
+											<ignoreClass>com.coreos.jetcd.resolver.*</ignoreClass>
+										</ignoreClasses>
+									</dependency>
+								</dependencies>
+							</banDuplicateClasses>
+						</rules>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 </project>
