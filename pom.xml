@@ -10,7 +10,7 @@
 		<relativePath />
 	</parent>
 
-	<groupId>nl.topicus.naming.etcd</groupId>
+	<groupId>nl.topicus</groupId>
 	<artifactId>naming-etcd</artifactId>
 	<version>3.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
