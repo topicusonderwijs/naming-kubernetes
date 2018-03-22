@@ -1,0 +1,36 @@
+<modules xmlns="http://smartics.de/ns/jboss-modules-descriptor/1">
+	<module name="nl.topicus.naming-etcd">
+		<match>
+			<includes>
+				<include>
+					<artifactId>.*</artifactId>
+				</include>
+			</includes>
+			<excludes>
+				<exclude>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclude>
+			</excludes>
+		</match>
+		<apply-to-dependencies>
+			<dependencies>
+				<match>
+					<includes>
+						<include>.+</include>
+					</includes>
+				</match>
+			</dependencies>
+		</apply-to-dependencies>
+		<apply-to-module>
+			<dependencies>
+				<module name="com.google.guava" />
+				<module name="javax.api" />
+				<module name="org.jboss.as.naming" />
+				<module name="org.jboss.logging" />
+				<module name="org.slf4j" />
+				<module name="sun.jdk" />
+			</dependencies>
+		</apply-to-module>
+	</module>
+</modules>

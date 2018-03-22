@@ -43,6 +43,18 @@
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.jboss.logging</groupId>
+				<artifactId>jboss-logging</artifactId>
+				<version>${wildfly.version.org.jboss.logging.jboss-logging}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${wildfly.version.org.slf4j}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
 				<groupId>com.coreos</groupId>
 				<artifactId>jetcd-common</artifactId>
 				<version>${jetcd.version}</version>
@@ -182,6 +194,10 @@
 			<artifactId>guava</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.jboss.logging</groupId>
+			<artifactId>jboss-logging</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.coreos</groupId>
 			<artifactId>jetcd-core</artifactId>
 		</dependency>
@@ -200,6 +216,61 @@
 	<build>
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<groupId>de.smartics.maven.plugin</groupId>
+					<artifactId>smartics-jboss-modules-maven-plugin</artifactId>
+					<version>2.1.4</version>
+					<executions>
+						<execution>
+							<id>create-modules-archive</id>
+							<goals>
+								<goal>create-modules-archive</goal>
+							</goals>
+							<phase>package</phase>
+						</execution>
+					</executions>
+					<configuration>
+						<attach>false</attach>
+						<targetNamespace>urn:jboss:module:1.5</targetNamespace>
+						<dependencyExcludes>
+							<exclude>
+								<groupId>com.google.guava</groupId>
+								<artifactId>guava</artifactId>
+							</exclude>
+							<exclude>
+								<groupId>log4j</groupId>
+								<artifactId>log4j</artifactId>
+							</exclude>	
+							<exclude>
+								<artifactId>log4j-api</artifactId>
+							</exclude>							
+							<exclude>
+								<groupId>org.slf4j</groupId>
+								<artifactId>slf4j-api</artifactId>
+							</exclude>
+						</dependencyExcludes>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<executions>
+						<execution>
+							<goals>
+								<goal>single</goal>
+							</goals>
+							<phase>package</phase>
+						</execution>
+					</executions>
+					<configuration>
+						<descriptors>
+							<descriptor>src/main/assembly/assembly.xml</descriptor>
+						</descriptors>
+						<formats>
+							<format>zip</format>
+						</formats>
+					</configuration>
+				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
@@ -228,5 +299,15 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>de.smartics.maven.plugin</groupId>
+				<artifactId>smartics-jboss-modules-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+			</plugin>
+		</plugins>
 	</build>
 </project>
