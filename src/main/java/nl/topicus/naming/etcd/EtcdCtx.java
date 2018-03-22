@@ -12,12 +12,15 @@ import com.coreos.jetcd.Client;
 import com.coreos.jetcd.ClientBuilder;
 import io.grpc.netty.GrpcSslContexts;
 import io.netty.handler.ssl.SslContext;
+import org.jboss.logging.Logger;
 
 public class EtcdCtx implements Context, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
 	private static final String CA_CERT = "java.naming.etcd.cacert";
+
+	private static final Logger logger = Logger.getLogger(EtcdCtx.class);
 
 	private final List<String> endpoints;
 
@@ -38,7 +41,7 @@ public class EtcdCtx implements Context, Serializable
 		}
 		catch (Exception e)
 		{
-			NamingException ne = new NamingException("");
+			NamingException ne = new NamingException("Failed to create etcd store!");
 			ne.setRootCause(e);
 			throw ne;
 		}
@@ -76,7 +79,11 @@ public class EtcdCtx implements Context, Serializable
 	@Override
 	public Object lookup(Name name) throws NamingException
 	{
-		return store.get(name);
+		logger.debugv("Lookup for ''{0}''...", name.toString());
+		Object value = store.get(name);
+		logger.debugv("Lookup for ''{0}'' returned {1} result.", name.toString(),
+			value != null ? "a" : "no");
+		return value;
 	}
 
 	@Override

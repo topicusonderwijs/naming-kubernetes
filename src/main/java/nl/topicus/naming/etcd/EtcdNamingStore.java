@@ -22,12 +22,19 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import org.jboss.logging.Logger;
 
 public class EtcdNamingStore
 {
+	private static final Logger logger = Logger.getLogger(EtcdNamingStore.class);
+
+	private static final String PREFIX = "java.naming.etcd.prefix";
+
 	private final Client client;
 
 	private final Hashtable<String, Object> envprops;
+
+	private final String prefix;
 
 	private final LoadingCache<Name, Optional<Object>> values;
 
@@ -35,6 +42,7 @@ public class EtcdNamingStore
 	{
 		this.client = client;
 		this.envprops = envprops;
+		prefix = (String) envprops.get(PREFIX);
 		values = createCache();
 	}
 
@@ -65,9 +73,10 @@ public class EtcdNamingStore
 
 	private ByteSequence fetch(final Name name) throws InterruptedException, ExecutionException
 	{
+		String etcdKey = prefix + name.toString();
+		logger.debugv("Fetching key ''{0}'' from etcd...", etcdKey);
 		// TODO: exceptie indien meerdere keys gevonden ipv 1ste teruggeven
-		GetResponse getResponse =
-			client.getKVClient().get(ByteSequence.fromString(name.toString())).get();
+		GetResponse getResponse = client.getKVClient().get(ByteSequence.fromString(etcdKey)).get();
 		return getResponse.getKvs().isEmpty() ? null : getResponse.getKvs().get(0).getValue();
 	}
 
