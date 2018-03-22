@@ -65,10 +65,7 @@ public class EtcdNamingStore
 	private Object createBinding(final Name name) throws InterruptedException, ExecutionException
 	{
 		ByteSequence value = fetch(name);
-		if (value == null)
-			return null;
-
-		return coerceToType(value, getType(name));
+		return value == null ? null : coerceToType(value, getType(name));
 	}
 
 	private ByteSequence fetch(final Name name) throws InterruptedException, ExecutionException
