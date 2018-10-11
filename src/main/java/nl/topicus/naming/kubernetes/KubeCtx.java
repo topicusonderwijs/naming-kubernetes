@@ -1,89 +1,75 @@
-package nl.topicus.naming.etcd;
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package nl.topicus.naming.kubernetes;
 
-import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Hashtable;
-import java.util.List;
 
 import javax.naming.*;
-import javax.net.ssl.SSLException;
 
-import com.coreos.jetcd.Client;
-import com.coreos.jetcd.ClientBuilder;
-import io.grpc.netty.GrpcSslContexts;
-import io.netty.handler.ssl.SslContext;
+import io.kubernetes.client.ApiClient;
+import io.kubernetes.client.Configuration;
+import io.kubernetes.client.util.Config;
 import org.jboss.logging.Logger;
 
-public class EtcdCtx implements Context, Serializable
+public class KubeCtx implements Context, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	private static final String CA_CERT = "java.naming.etcd.cacert";
-
-	private static final Logger logger = Logger.getLogger(EtcdCtx.class);
-
-	private final List<String> endpoints;
+	private static final Logger logger = Logger.getLogger(KubeCtx.class);
 
 	private final Hashtable<String, Object> envprops;
 
-	private final EtcdNamingStore store;
+	private final KubeNamingStore store;
 
 	@SuppressWarnings("unchecked")
-	public EtcdCtx(final List<String> endpoints, final Hashtable< ? , ? > props)
-			throws NamingException
+	public KubeCtx(final Hashtable< ? , ? > props) throws NamingException
 	{
-		this.endpoints = endpoints;
-		envprops = props != null ? (Hashtable<String, Object>) props.clone() : null;
-
+		envprops = props != null ? (Hashtable<String, Object>) props.clone() : new Hashtable<>(0);
 		try
 		{
-			this.store = new EtcdNamingStore(createEtcdClient(), envprops);
+			this.store = new KubeNamingStore(createClient(), envprops);
 		}
 		catch (Exception e)
 		{
-			NamingException ne = new NamingException("Failed to create etcd store!");
+			NamingException ne = new NamingException("Failed to create Kubernetes store!");
 			ne.setRootCause(e);
 			throw ne;
 		}
 	}
 
-	private Client createEtcdClient() throws SSLException
+	private ApiClient createClient() throws IOException
 	{
-		ClientBuilder clientBuilder = Client.builder().endpoints(endpoints);
-
-		if (endpoints.get(0).startsWith("https"))
-		{
-			clientBuilder.sslContext(createSslContext());
-		}
-
-		return clientBuilder.build();
-	}
-
-	private SslContext createSslContext() throws SSLException
-	{
-		if (!envprops.containsKey(CA_CERT))
-		{
-			throw new SSLException(
-				"Missing required environment parameter '" + CA_CERT + "' for tls!");
-		}
-
-		SslContext sslContext = null;
-		sslContext = GrpcSslContexts.forClient()
-			.protocols("TLSv1.2")
-			// TODO: .keyManager(keyCertChainFile, keyFile) for client auth
-			.trustManager(new File((String) envprops.get(CA_CERT)))
-			.build();
-		return sslContext;
+		Configuration.setDefaultApiClient(Config.defaultClient());
+		return Configuration.getDefaultApiClient();
 	}
 
 	@Override
 	public Object lookup(Name name) throws NamingException
 	{
 		logger.debugv("Lookup for ''{0}''...", name.toString());
-		Object value = store.get(name);
-		logger.debugv("Lookup for ''{0}'' returned {1} result.", name.toString(),
-			value != null ? "a" : "no");
-		return value;
+		try
+		{
+			return store.get(name);
+		}
+		catch (NamingException e)
+		{
+			logger.debugv("Lookup for ''{0}'' failed!", name.toString());
+			throw e;
+		}
 	}
 
 	@Override

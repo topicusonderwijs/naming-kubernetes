@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>nl.topicus.onderwijs.parent</groupId>
 		<artifactId>onderwijs-parent-base</artifactId>
-		<version>2018.1.6</version>
+		<version>2018.9.2</version>
 		<relativePath />
 	</parent>
 
 	<groupId>nl.topicus</groupId>
-	<artifactId>naming-etcd</artifactId>
-	<version>3.0.0-SNAPSHOT</version>
+	<artifactId>naming-kubernetes</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>JBoss WildFly naming module for etcd3</name>
-	<description>Naming backend for WildFly using etcd3.</description>
+	<name>JBoss WildFly naming module for Kubernetes</name>
+	<description>Naming backend for WildFly using Kubernetes (configmap and secret resources).</description>
 
 	<organization>
 		<name>Topicus B.V.</name>
@@ -26,20 +27,58 @@
 	<inceptionYear>2018</inceptionYear>
 
 	<properties>
-		<jetcd.version>0.0.2</jetcd.version>
-		<grpc.version>1.10.0</grpc.version>
-		<netty.version>4.1.22.Final</netty.version>
-		<opencensus.version>0.11.1</opencensus.version>
-		<protobuf.version>3.5.1</protobuf.version>
+		<kubernetes.client.version>2.0.0</kubernetes.client.version>
+		<okhttp.version>2.7.5</okhttp.version>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<!-- Use WildFly Guava module -->
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>${wildfly.version.com.google.code.gson}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>20.0</version>
+				<version>${wildfly.version.com.google.guava}</version>
+				<scope>provided</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>com.google.code.findbugs</groupId>
+						<artifactId>jsr305</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>${wildfly.version.commons-codec}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>joda-time</groupId>
+				<artifactId>joda-time</artifactId>
+				<version>${wildfly.version.joda-time}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${wildfly.version.commons-lang3}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-jdk15on</artifactId>
+				<version>${wildfly.version.org.bouncycastle}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk15on</artifactId>
+				<version>${wildfly.version.org.bouncycastle}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
@@ -55,136 +94,56 @@
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<groupId>com.coreos</groupId>
-				<artifactId>jetcd-common</artifactId>
-				<version>${jetcd.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.coreos</groupId>
-				<artifactId>jetcd-core</artifactId>
-				<version>${jetcd.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.coreos</groupId>
-				<artifactId>jetcd-resolver</artifactId>
-				<version>${jetcd.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.google.api.grpc</groupId>
-				<artifactId>proto-google-common-protos</artifactId>
-				<version>1.0.0</version>
+				<groupId>org.yaml</groupId>
+				<artifactId>snakeyaml</artifactId>
+				<version>${wildfly.version.org.yaml.snakeyaml}</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>com.google.protobuf</groupId>
 				<artifactId>protobuf-java</artifactId>
-				<version>${protobuf.version}</version>
+				<version>3.4.0</version>
 			</dependency>
 			<dependency>
-				<groupId>com.google.protobuf</groupId>
-				<artifactId>protobuf-java-util</artifactId>
-				<version>${protobuf.version}</version>
+				<groupId>com.squareup.okhttp</groupId>
+				<artifactId>logging-interceptor</artifactId>
+				<version>${okhttp.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-context</artifactId>
-				<version>${grpc.version}</version>
+				<groupId>com.squareup.okhttp</groupId>
+				<artifactId>okhttp</artifactId>
+				<version>${okhttp.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-core</artifactId>
-				<version>${grpc.version}</version>
+				<groupId>com.squareup.okhttp</groupId>
+				<artifactId>okhttp-ws</artifactId>
+				<version>${okhttp.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.kubernetes</groupId>
+				<artifactId>client-java</artifactId>
+				<version>${kubernetes.client.version}</version>
 				<exclusions>
 					<exclusion>
-						<groupId>com.google.code.findbugs</groupId>
-						<artifactId>jsr305</artifactId>
+						<groupId>org.bouncycastle</groupId>
+						<artifactId>bcprov-ext-jdk15on</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-netty</artifactId>
-				<version>${grpc.version}</version>
+				<groupId>io.kubernetes</groupId>
+				<artifactId>client-java-api</artifactId>
+				<version>${kubernetes.client.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-protobuf</artifactId>
-				<version>${grpc.version}</version>
+				<groupId>io.kubernetes</groupId>
+				<artifactId>client-java-proto</artifactId>
+				<version>${kubernetes.client.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-protobuf-lite</artifactId>
-				<version>${grpc.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-stub</artifactId>
-				<version>${grpc.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty-buffer</artifactId>
-				<version>${netty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty-codec</artifactId>
-				<version>${netty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty-codec-http</artifactId>
-				<version>${netty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty-codec-http2</artifactId>
-				<version>${netty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty-codec-socks</artifactId>
-				<version>${netty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty-common</artifactId>
-				<version>${netty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty-handler</artifactId>
-				<version>${netty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty-handler-proxy</artifactId>
-				<version>${netty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty-resolver</artifactId>
-				<version>${netty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty-tcnative-boringssl-static</artifactId>
-				<version>2.0.7.Final</version>
-				<classifier>linux-x86_64</classifier>
-			</dependency>
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty-transport</artifactId>
-				<version>${netty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.opencensus</groupId>
-				<artifactId>opencensus-api</artifactId>
-				<version>${opencensus.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.opencensus</groupId>
-				<artifactId>opencensus-contrib-grpc-metrics</artifactId>
-				<version>${opencensus.version}</version>
+				<groupId>io.swagger</groupId>
+				<artifactId>swagger-annotations</artifactId>
+				<version>1.5.12</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -198,13 +157,8 @@
 			<artifactId>jboss-logging</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.coreos</groupId>
-			<artifactId>jetcd-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-tcnative-boringssl-static</artifactId>
-			<classifier>linux-x86_64</classifier>
+			<groupId>io.kubernetes</groupId>
+			<artifactId>client-java</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -217,9 +171,28 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>com.mycila</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>3.0</version>
+					<configuration>
+						<header>src/main/license.txt</header>
+						<includes>
+							<include>src/main/**/*.java</include>
+						</includes>
+					</configuration>
+					<executions>
+						<execution>
+							<phase>process-sources</phase>
+							<goals>
+								<goal>format</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
 					<groupId>de.smartics.maven.plugin</groupId>
 					<artifactId>smartics-jboss-modules-maven-plugin</artifactId>
-					<version>2.1.4</version>
+					<version>2.1.5</version>
 					<executions>
 						<execution>
 							<id>create-modules-archive</id>
@@ -234,16 +207,52 @@
 						<targetNamespace>urn:jboss:module:1.5</targetNamespace>
 						<dependencyExcludes>
 							<exclude>
+								<groupId>com.google.code.gson</groupId>
+								<artifactId>gson</artifactId>
+							</exclude>
+							<exclude>
+								<groupId>com.google.android</groupId>
+								<artifactId>android</artifactId>
+							</exclude>
+							<exclude>
 								<groupId>com.google.guava</groupId>
 								<artifactId>guava</artifactId>
 							</exclude>
 							<exclude>
+								<groupId>commons-codec</groupId>
+								<artifactId>commons-codec</artifactId>
+							</exclude>
+							<exclude>
+								<groupId>joda-time</groupId>
+								<artifactId>joda-time</artifactId>
+							</exclude>
+							<exclude>
 								<groupId>log4j</groupId>
 								<artifactId>log4j</artifactId>
-							</exclude>	
+							</exclude>
 							<exclude>
 								<artifactId>log4j-api</artifactId>
-							</exclude>							
+							</exclude>
+							<exclude>
+								<groupId>org.apache.commons</groupId>
+								<artifactId>commons-lang3</artifactId>
+							</exclude>
+							<exclude>
+								<groupId>org.bouncycastle</groupId>
+								<artifactId>bcpkix-jdk15on</artifactId>
+							</exclude>
+							<exclude>
+								<groupId>org.bouncycastle</groupId>
+								<artifactId>bcprov-jdk15on</artifactId>
+							</exclude>
+							<exclude>
+								<groupId>org.jboss.logging</groupId>
+								<artifactId>jboss-logging</artifactId>
+							</exclude>
+							<exclude>
+								<groupId>org.yaml</groupId>
+								<artifactId>snakeyaml</artifactId>
+							</exclude>
 							<exclude>
 								<groupId>org.slf4j</groupId>
 								<artifactId>slf4j-api</artifactId>
@@ -279,17 +288,10 @@
 							<banDuplicateClasses>
 								<dependencies>
 									<dependency>
-										<groupId>com.coreos</groupId>
-										<artifactId>jetcd-core</artifactId>
+										<groupId>io.kubernetes</groupId>
+										<artifactId>client-java</artifactId>
 										<ignoreClasses>
-											<ignoreClass>com.coreos.jetcd.common.exception.*</ignoreClass>
-										</ignoreClasses>
-									</dependency>
-									<dependency>
-										<groupId>com.coreos</groupId>
-										<artifactId>jetcd-core</artifactId>
-										<ignoreClasses>
-											<ignoreClass>com.coreos.jetcd.resolver.*</ignoreClass>
+											<ignoreClass>io.kubernetes.client.*</ignoreClass>
 										</ignoreClasses>
 									</dependency>
 								</dependencies>
@@ -300,6 +302,10 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<groupId>com.mycila</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+			</plugin>
 			<plugin>
 				<groupId>de.smartics.maven.plugin</groupId>
 				<artifactId>smartics-jboss-modules-maven-plugin</artifactId>

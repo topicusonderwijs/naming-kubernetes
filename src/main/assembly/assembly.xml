@@ -7,10 +7,17 @@
 	<fileSets>
 		<fileSet>
 			<directory>${project.build.directory}/jboss-modules</directory>
-			<outputDirectory>/</outputDirectory>
+			<outputDirectory>${file.separator}</outputDirectory>
 			<includes>
 				<include>**/*</include>
 			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}</directory>
+			<outputDirectory>nl/topicus/naming-kubernetes/main</outputDirectory>
+			<includes>
+				<include>LICENSE</include>
+			</includes>			
 		</fileSet>
 	</fileSets>
 </assembly>
