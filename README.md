@@ -1,4 +1,4 @@
-# naming-k8s
+# naming-kubernetes
 
 A Java naming context for [WildFly](http://wildfly.org/) using [Kubernetes](https://kubernetes.io/) as backend for lookups.
 
