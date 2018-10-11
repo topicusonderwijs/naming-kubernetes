@@ -5,11 +5,14 @@ import java.util.Hashtable;
 import javax.naming.NamingException;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class KubeNamingStoreTest
 {
+	// Werkt alleen als je kube config hebt (maw dus niet op de buildserver)
 	@Test
+	@Ignore
 	public void testSomething() throws NamingException
 	{
 		System.setProperty("org.jboss.logging.provider", "slf4j");
