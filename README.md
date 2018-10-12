@@ -10,7 +10,7 @@ WildFly 11 subsystem configuration:
 		<external-context name="java:/k8s" module="nl.topicus.naming-kubernetes" class="javax.naming.InitialContext" cache="false">
 			<environment>
 				<property name="java.naming.factory.initial" value="nl.topicus.naming.kubernetes.KubeCtxFactory"/>
-				<property name="java.naming.kubernetes.namespace" value="acc-application"/>
+				<property name="java.naming.kubernetes.namespace" value="<kubernetes namespace>"/>
 			</environment>
 		</external-context>
 	</bindings>
