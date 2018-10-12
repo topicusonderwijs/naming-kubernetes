@@ -38,11 +38,13 @@ import org.jboss.logging.Logger;
 
 public class KubeNamingStore
 {
+	public static final String CONTEXT_PROPERTY = "java.naming.kubernetes.context";
+
 	public static final String NAMESPACE_PROPERTY = "java.naming.kubernetes.namespace";
 
 	private static final Logger logger = Logger.getLogger(KubeNamingStore.class);
 
-	private static final String LABEL_SELECTOR = "k8s.naming.topicus.nl=true";
+	private static final String LABEL_SELECTOR = "k8s.naming.topicus.nl/externalcontext";
 
 	private static final String ANNOTATION_KEY = "k8s.naming.topicus.nl/context";
 
@@ -52,11 +54,14 @@ public class KubeNamingStore
 
 	private final LoadingCache<Name, Optional<Object>> values;
 
+	private final String context;
+
 	private final String namespace;
 
 	public KubeNamingStore(final ApiClient client, final Hashtable<String, Object> envprops)
 	{
 		this.client = client;
+		context = (String) envprops.getOrDefault(CONTEXT_PROPERTY, "");
 		namespace = (String) envprops.getOrDefault(NAMESPACE_PROPERTY, "default");
 		api = new CoreV1Api();
 		values = createCache();
@@ -90,7 +95,7 @@ public class KubeNamingStore
 	private Object loadFromConfigMap(final String context, final String key) throws ApiException
 	{
 		V1ConfigMapList configMaps = api.listNamespacedConfigMap(namespace, null, null, null, null,
-			LABEL_SELECTOR, null, null, null, null);
+			getLabelSelector(), null, null, null, null);
 		for (V1ConfigMap configMap : configMaps.getItems())
 		{
 			String ann = null;
@@ -151,7 +156,7 @@ public class KubeNamingStore
 	private Object loadFromSecret(final String context, final String key) throws ApiException
 	{
 		V1SecretList secrets = api.listNamespacedSecret(namespace, null, null, null, null,
-			LABEL_SELECTOR, null, null, null, null);
+			getLabelSelector(), null, null, null, null);
 		for (V1Secret secret : secrets.getItems())
 		{
 			String ann = null;
@@ -194,6 +199,11 @@ public class KubeNamingStore
 		String fn = name.toString();
 		int i = fn.lastIndexOf('/');
 		return i > 0 ? fn.substring(i + 1) : fn;
+	}
+
+	private String getLabelSelector()
+	{
+		return String.format("%s=%s", LABEL_SELECTOR, context);
 	}
 
 	public Object get(final Name key) throws NamingException
