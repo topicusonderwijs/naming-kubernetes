@@ -2,8 +2,25 @@
 
 A Java naming context for [WildFly](http://wildfly.org/) using [Kubernetes](https://kubernetes.io/) as backend for lookups.
 
-## Configuration
-WildFly 11 subsystem configuration:
+JNDI lookups are resolved to configmap or secret keys using the Kubernetes API. Configmaps and secrets should have the following label to be eligible for naming resolution:
+
+```
+k8s.naming.topicus.nl: true
+```
+
+JNDI subcontexts have their own configmap/secret. To distinguish different subcontexts the configmap/secret should get the following annotation with the full subcontext path as value:
+
+```
+k8s.naming.topicus.nl/context: <subcontext>
+```
+
+All lookups are first tried to resolve as configmap key. If no configmap key exists for the given JNDI name a secret lookup is performed.
+
+## WildFly configuration
+The naming-kubernetes module should be placed in the WildFly module directory.
+
+WildFly subsystem configuration:
+
 ```xml
 <subsystem xmlns="urn:jboss:domain:naming:2.0">
 	<bindings>
@@ -19,8 +36,45 @@ WildFly 11 subsystem configuration:
 ```
 
 Enable debug logging for naming-kubernetes:
+
 ```xml
 <logger category="nl.topicus.naming.kubernetes">
 	<level name="DEBUG"/>
 </logger>
 ```
+
+## Java types
+The values returned from Kubernetes are of the Java type `String`. JNDI values are of the Java type `Object`. To expose values as typed Java objects the following type conversion rules are applied:
+- Boolean: a `true` or `false` (case insensitive)
+- Integer: a value containing only the characters 0-9 (no negative numbers, no overflow detection)
+- String: A string of text
+
+
+## Examples
+The following configmap exposes the JNDI name `java://k8s/my.jndi.key` (`k8s` is the name of the external-context):
+
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    k8s.naming.topicus.nl: "true"
+  name: ConfigMapExample
+data:
+  my.jndi.key: "naming-kubernetes-sample-value"
+```
+
+The JNDI name `java://k8s/my.subcontext/my.jndi.key` is exposed by the following configmap:
+
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    k8s.naming.topicus.nl: "true"
+  annotations:
+    k8s.naming.topicus.nl/context: "my.subcontext"
+  name: ConfigMapSubContextExample
+data:
+  my.jndi.key: "naming-kubernetes-sample-value"
+``` 
