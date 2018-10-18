@@ -24,7 +24,6 @@
 		</apply-to-dependencies>
 		<apply-to-module>
 			<dependencies>
-				<module name="com.google.code.gson" />
 				<module name="com.google.guava" />
 				<module name="javax.api" />
 				<module name="org.apache.commons.codec" />

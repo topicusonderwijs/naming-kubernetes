@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>nl.topicus.onderwijs.parent</groupId>
 		<artifactId>onderwijs-parent-base</artifactId>
-		<version>2018.9.2</version>
+		<version>2018.9.0</version>
 		<relativePath />
 	</parent>
 
@@ -206,10 +206,6 @@
 						<attach>false</attach>
 						<targetNamespace>urn:jboss:module:1.5</targetNamespace>
 						<dependencyExcludes>
-							<exclude>
-								<groupId>com.google.code.gson</groupId>
-								<artifactId>gson</artifactId>
-							</exclude>
 							<exclude>
 								<groupId>com.google.android</groupId>
 								<artifactId>android</artifactId>
