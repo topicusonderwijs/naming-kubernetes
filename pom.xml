@@ -204,7 +204,7 @@
 					</executions>
 					<configuration>
 						<attach>false</attach>
-						<targetNamespace>urn:jboss:module:1.5</targetNamespace>
+						<targetNamespace>urn:jboss:module:1.8</targetNamespace>
 						<dependencyExcludes>
 							<exclude>
 								<groupId>com.google.code.gson</groupId>
