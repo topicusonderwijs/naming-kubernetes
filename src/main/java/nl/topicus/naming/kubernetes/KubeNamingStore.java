@@ -77,7 +77,16 @@ public class KubeNamingStore
 				@Override
 				public Optional<Object> load(Name name) throws Exception
 				{
-					return Optional.ofNullable(loadInternal(name));
+					try
+					{
+						return Optional.ofNullable(loadInternal(name));
+					}
+					catch (ApiException e)
+					{
+						logger.errorv(e, "Failed to call Kubernetes API for ''{0}''!",
+							name.toString());
+						return Optional.empty();
+					}
 				}
 			});
 		// TODO : async refresh / k8s watch
