@@ -2,6 +2,7 @@ package nl.topicus.naming.kubernetes;
 
 import java.util.Hashtable;
 
+import javax.naming.Context;
 import javax.naming.NamingException;
 
 import org.junit.Assert;
@@ -16,9 +17,10 @@ public class KubeNamingStoreTest
 	public void testSomething() throws NamingException
 	{
 		System.setProperty("org.jboss.logging.provider", "slf4j");
-		KubeCtx ctx = new KubeCtx(new Hashtable<String, Object>()
+		Context ctx = new KubeCtxFactory().getInitialContext(new Hashtable<String, Object>()
 		{
 			{
+				put(KubeNamingStore.CONTEXT_PROPERTY, "authenticator");
 				put(KubeNamingStore.NAMESPACE_PROPERTY, "acc-application");
 			}
 		});
