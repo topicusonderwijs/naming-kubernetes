@@ -214,7 +214,7 @@ public class KubeNamingStore
 
 	private String getLabelSelector()
 	{
-		return String.format("%s=%s", LABEL_SELECTOR, context);
+		return String.format("%s in (, %s)", LABEL_SELECTOR, context);
 	}
 
 	public Object get(final Name key) throws NamingException
