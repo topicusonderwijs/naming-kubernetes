@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import javax.naming.Name;
 import javax.naming.NamingException;
 
+import com.google.common.base.Charsets;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -207,7 +208,7 @@ public class KubeNamingStore
 			{
 				logger.debugv("Found key ''{0}'' (context ''{1}'') in secret ''{2}''", key,
 					context != null ? context : "/", secret.getMetadata().getName());
-				return new String(value);
+				return new String(value, Charsets.UTF_8);
 			}
 		}
 		logger.debugv("Key ''{0}'' (context {1}) not found in secret", key, context);
@@ -236,11 +237,11 @@ public class KubeNamingStore
 
 		if (annCertKey.equals(key))
 		{
-			return secret.getData().get("tls.crt");
+			return new String(secret.getData().get("tls.crt"), Charsets.UTF_8);
 		}
 		else if (annPrivKey.equals(key))
 		{
-			return secret.getData().get("tls.key");
+			return new String(secret.getData().get("tls.key"), Charsets.UTF_8);
 		}
 		return null;
 	}
