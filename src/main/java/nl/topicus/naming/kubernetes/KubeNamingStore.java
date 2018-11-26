@@ -1,18 +1,16 @@
 /**
- *    Licensed to the Apache Software Foundation (ASF) under one or more
- *    contributor license agreements.  See the NOTICE file distributed with
- *    this work for additional information regarding copyright ownership.
- *    The ASF licenses this file to You under the Apache License, Version 2.0
- *    (the "License"); you may not use this file except in compliance with
- *    the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package nl.topicus.naming.kubernetes;
 
@@ -49,6 +47,13 @@ public class KubeNamingStore
 	private static final String LABEL_SELECTOR = "k8s.naming.topicus.nl/externalcontext";
 
 	private static final String ANNOTATION_KEY = "k8s.naming.topicus.nl/context";
+
+	private static final String ANNOTATION_CERTIFICATE_KEY =
+		"k8s.naming.topicus.nl/key_certificate";
+
+	private static final String ANNOTATION_PRIVATEKEY_KEY = "k8s.naming.topicus.nl/key_privatekey";
+
+	private static final String SECRET_TLS = "kubernetes.io/tls";
 
 	private final ApiClient client;
 
@@ -185,16 +190,58 @@ public class KubeNamingStore
 				continue;
 			}
 
+			if (SECRET_TLS.equalsIgnoreCase(secret.getType()))
+			{
+				Object result = loadFromTlsSecret(secret, key);
+				if (result != null)
+				{
+					logger.debugv("Found key ''{0}'' (context ''{1}'') in tls secret ''{2}''", key,
+						context != null ? context : "/", secret.getMetadata().getName());
+					return result;
+				}
+				continue;
+			}
+
 			byte[] value = secret.getData().get(key);
 			if (value != null)
 			{
-				logger.debugv("Found key ''{1}'' (context ''{2}'') in secret ''{3}''",
-					new String(value), key, context != null ? context : "/",
-					secret.getMetadata().getName());
+				logger.debugv("Found key ''{0}'' (context ''{1}'') in secret ''{2}''", key,
+					context != null ? context : "/", secret.getMetadata().getName());
 				return new String(value);
 			}
 		}
 		logger.debugv("Key ''{0}'' (context {1}) not found in secret", key, context);
+		return null;
+	}
+
+	private Object loadFromTlsSecret(final V1Secret secret, final String key)
+	{
+		String annCertKey = secret.getMetadata().getAnnotations().get(ANNOTATION_CERTIFICATE_KEY);
+		if (annCertKey == null)
+		{
+			logger.debugv(
+				"Skipping tls secret ''{2}'' (missing certificate annotation) for key ''{1}'' (context ''{0}'')",
+				context, key, secret.getMetadata().getName());
+			return null;
+		}
+
+		String annPrivKey = secret.getMetadata().getAnnotations().get(ANNOTATION_PRIVATEKEY_KEY);
+		if (annPrivKey == null)
+		{
+			logger.debugv(
+				"Skipping tls secret ''{2}'' (missing privatekey annotation) for key ''{1}'' (context ''{0}'')",
+				context, key, secret.getMetadata().getName());
+			return null;
+		}
+
+		if (annCertKey.equals(key))
+		{
+			return secret.getData().get("tls.crt");
+		}
+		else if (annPrivKey.equals(key))
+		{
+			return secret.getData().get("tls.key");
+		}
 		return null;
 	}
 
