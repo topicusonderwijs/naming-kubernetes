@@ -14,6 +14,11 @@
  */
 package nl.topicus.naming.kubernetes;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.security.KeyPair;
+import java.util.Base64;
 import java.util.Hashtable;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -35,6 +40,9 @@ import io.kubernetes.client.openapi.models.V1ConfigMapList;
 import io.kubernetes.client.openapi.models.V1Secret;
 import io.kubernetes.client.openapi.models.V1SecretList;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.jboss.logging.Logger;
 
 public class KubeNamingStore
@@ -52,9 +60,25 @@ public class KubeNamingStore
 	private static final String ANNOTATION_CERTIFICATE_KEY =
 		"k8s.naming.topicus.nl/key_certificate";
 
+	private static final String ANNOTATION_CERTIFICATE_STRING =
+		"k8s.naming.topicus.nl/certificate_string";
+
+	private static final String ANNOTATION_CERTIFICATE_HEADER_FOOTER =
+		"k8s.naming.topicus.nl/certificate_remove_header_footer";
+
 	private static final String ANNOTATION_PRIVATEKEY_KEY = "k8s.naming.topicus.nl/key_privatekey";
 
+	private static final String ANNOTATION_PRIVATEKEY_STRING =
+		"k8s.naming.topicus.nl/privatekey_string";
+
+	private static final String ANNOTATION_PRIVATEKEY_FORMAT =
+		"k8s.naming.topicus.nl/privatekey_format";
+
 	private static final String SECRET_TLS = "kubernetes.io/tls";
+
+	private static final String PEM_CERTIFICATE_START = "-----BEGIN CERTIFICATE-----";
+
+	private static final String PEM_CERTIFICATE_END = "-----END CERTIFICATE-----";
 
 	private final ApiClient client;
 
@@ -237,13 +261,61 @@ public class KubeNamingStore
 
 		if (annCertKey.equals(key))
 		{
-			return new String(secret.getData().get("tls.crt"), Charsets.UTF_8);
+			boolean certAsString = Boolean.parseBoolean(
+				secret.getMetadata().getAnnotations().get(ANNOTATION_CERTIFICATE_STRING));
+			if (!certAsString)
+			{
+				return secret.getData().get("tls.crt");
+			}
+
+			String crt = new String(secret.getData().get("tls.crt"), Charsets.UTF_8);
+			if (Boolean.parseBoolean(
+				secret.getMetadata().getAnnotations().get(ANNOTATION_CERTIFICATE_HEADER_FOOTER)))
+			{
+				crt = removePEMHeaderAndFooter(crt, PEM_CERTIFICATE_START, PEM_CERTIFICATE_END);
+			}
+			return crt;
 		}
 		else if (annPrivKey.equals(key))
 		{
-			return new String(secret.getData().get("tls.key"), Charsets.UTF_8);
+			boolean pkAsString = Boolean.parseBoolean(
+				secret.getMetadata().getAnnotations().get(ANNOTATION_PRIVATEKEY_STRING));
+
+			byte[] pk = secret.getData().get("tls.key");
+			if ("PKCS#8".equalsIgnoreCase(
+				secret.getMetadata().getAnnotations().get(ANNOTATION_PRIVATEKEY_FORMAT)))
+			{
+				pk = convertToPKCS8(pk);
+			}
+
+			return pk != null && pkAsString ? new String(pk) : pk;
 		}
 		return null;
+	}
+
+	private String removePEMHeaderAndFooter(final String data, final String header,
+			final String footer)
+	{
+		String result = StringUtils.remove(data, "\n");
+		result = StringUtils.removeStart(result, header);
+		result = StringUtils.removeEnd(result, footer);
+		return result;
+	}
+
+	private byte[] convertToPKCS8(final byte[] pkdata)
+	{
+		JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+		try (PEMParser reader =
+			new PEMParser(new InputStreamReader(new ByteArrayInputStream(pkdata))))
+		{
+			KeyPair kp = converter.getKeyPair((PEMKeyPair) reader.readObject());
+			return Base64.getEncoder().encode(kp.getPrivate().getEncoded());
+		}
+		catch (IOException e)
+		{
+			logger.errorv("Failed to decode private key. Reason: {0}", e.getMessage());
+			return null;
+		}
 	}
 
 	private String getContext(final Name name)
