@@ -28,6 +28,7 @@
 
 	<properties>
 		<kubernetes.client.version>7.0.0</kubernetes.client.version>
+		<sundrio.version>0.19.2</sundrio.version>
 	</properties>
 
 	<dependencyManagement>
@@ -116,10 +117,28 @@
 				<version>${topicus.version.com.google.protobuf}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.squareup.okhttp3</groupId>
+				<artifactId>logging-interceptor</artifactId>
+				<version>${wildfly.version.com.squareup.okhttp3}</version>
+			</dependency>
+			<dependency>
+			    <groupId>io.gsonfire</groupId>
+			    <artifactId>gson-fire</artifactId>
+			    <version>1.8.3</version>
+			</dependency>				
+			<dependency>
 				<groupId>io.kubernetes</groupId>
 				<artifactId>client-java</artifactId>
 				<version>${kubernetes.client.version}</version>
 				<exclusions>
+					<exclusion>
+						<groupId>com.google.code.findbugs</groupId>
+						<artifactId>jsr305</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.annotation</groupId>
+						<artifactId>javax.annotation-api</artifactId>
+					</exclusion>					
 					<exclusion>
 						<groupId>org.bouncycastle</groupId>
 						<artifactId>bcprov-ext-jdk15on</artifactId>
@@ -137,9 +156,34 @@
 				<version>${kubernetes.client.version}</version>
 			</dependency>
 			<dependency>
+			    <groupId>io.sundr</groupId>
+			    <artifactId>builder-annotations</artifactId>
+			    <version>${sundrio.version}</version>
+			</dependency>				
+			<dependency>
+			    <groupId>io.sundr</groupId>
+			    <artifactId>resourcecify-annotations</artifactId>
+			    <version>${sundrio.version}</version>
+			</dependency>				
+			<dependency>
+			    <groupId>io.sundr</groupId>
+			    <artifactId>sundr-codegen</artifactId>
+			    <version>${sundrio.version}</version>
+			</dependency>				
+			<dependency>
+			    <groupId>io.sundr</groupId>
+			    <artifactId>sundr-core</artifactId>
+			    <version>${sundrio.version}</version>
+			</dependency>			
+			<dependency>
 				<groupId>io.swagger</groupId>
 				<artifactId>swagger-annotations</artifactId>
 				<version>1.5.12</version>
+			</dependency>
+			<dependency>
+				<groupId>org.joda</groupId>
+				<artifactId>joda-convert</artifactId>
+				<version>1.2</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -288,6 +332,17 @@
 										<artifactId>client-java</artifactId>
 										<ignoreClasses>
 											<ignoreClass>io.kubernetes.client.*</ignoreClass>
+										</ignoreClasses>
+									</dependency>
+									<dependency>
+										<groupId>io.sundr</groupId>
+										<artifactId>sundr-codegen</artifactId>
+										<ignoreClasses>
+											<ignoreClass>io.sundr.SundrException</ignoreClass>
+											<ignoreClass>io.sundr.Function</ignoreClass>
+											<ignoreClass>io.sundr.FunctionFactory</ignoreClass>
+											<ignoreClass>io.sundr.Provider</ignoreClass>
+											<ignoreClass>io.sundr.builder.*</ignoreClass>
 										</ignoreClasses>
 									</dependency>
 								</dependencies>
