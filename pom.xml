@@ -159,6 +159,12 @@
 			    <groupId>io.sundr</groupId>
 			    <artifactId>builder-annotations</artifactId>
 			    <version>${sundrio.version}</version>
+			    <exclusions>
+			    	<exclusion>
+					    <groupId>io.sundr</groupId>
+					    <artifactId>sundr-core</artifactId>
+			    	</exclusion>
+			    </exclusions>
 			</dependency>				
 			<dependency>
 			    <groupId>io.sundr</groupId>
@@ -169,12 +175,13 @@
 			    <groupId>io.sundr</groupId>
 			    <artifactId>sundr-codegen</artifactId>
 			    <version>${sundrio.version}</version>
+			    <exclusions>
+			    	<exclusion>
+					    <groupId>io.sundr</groupId>
+					    <artifactId>sundr-core</artifactId>
+			    	</exclusion>
+			    </exclusions>
 			</dependency>				
-			<dependency>
-			    <groupId>io.sundr</groupId>
-			    <artifactId>sundr-core</artifactId>
-			    <version>${sundrio.version}</version>
-			</dependency>			
 			<dependency>
 				<groupId>io.swagger</groupId>
 				<artifactId>swagger-annotations</artifactId>
