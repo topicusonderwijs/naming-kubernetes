@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>nl.topicus.onderwijs.parent</groupId>
 		<artifactId>onderwijs-parent-base</artifactId>
-		<version>2020.0.0</version>
+		<version>2020.0.1</version>
 		<relativePath />
 	</parent>
 
@@ -26,186 +26,28 @@
 
 	<inceptionYear>2018</inceptionYear>
 
-	<properties>
-		<kubernetes.client.version>7.0.0</kubernetes.client.version>
-		<sundrio.version>0.19.2</sundrio.version>
-	</properties>
-
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>com.google.code.gson</groupId>
-				<artifactId>gson</artifactId>
-				<version>${wildfly.version.com.google.code.gson}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
-				<version>${wildfly.version.com.google.guava}</version>
-				<scope>provided</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>com.google.code.findbugs</groupId>
-						<artifactId>jsr305</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>com.squareup.okhttp3</groupId>
-				<artifactId>okhttp</artifactId>
-				<version>${wildfly.version.com.squareup.okhttp3}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>com.squareup.okio</groupId>
-				<artifactId>okio</artifactId>
-				<version>${wildfly.version.com.squareup.okio}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>commons-codec</groupId>
-				<artifactId>commons-codec</artifactId>
-				<version>${wildfly.version.commons-codec}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>joda-time</groupId>
-				<artifactId>joda-time</artifactId>
-				<version>${wildfly.version.joda-time}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-lang3</artifactId>
-				<version>${wildfly.version.commons-lang3}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcpkix-jdk15on</artifactId>
-				<version>${wildfly.version.org.bouncycastle}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk15on</artifactId>
-				<version>${wildfly.version.org.bouncycastle}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.logging</groupId>
-				<artifactId>jboss-logging</artifactId>
-				<version>${wildfly.version.org.jboss.logging.jboss-logging}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>${wildfly.version.org.slf4j}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.yaml</groupId>
-				<artifactId>snakeyaml</artifactId>
-				<version>${wildfly.version.org.yaml.snakeyaml}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>com.google.protobuf</groupId>
-				<artifactId>protobuf-java</artifactId>
-				<version>${topicus.version.com.google.protobuf}</version>
-			</dependency>
 			<dependency>
 				<groupId>com.squareup.okhttp3</groupId>
 				<artifactId>logging-interceptor</artifactId>
 				<version>${wildfly.version.com.squareup.okhttp3}</version>
 			</dependency>
-			<dependency>
-				<groupId>io.gsonfire</groupId>
-				<artifactId>gson-fire</artifactId>
-				<version>1.8.3</version>
-			</dependency>
-			<dependency>
-				<groupId>io.kubernetes</groupId>
-				<artifactId>client-java</artifactId>
-				<version>${kubernetes.client.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>com.google.code.findbugs</groupId>
-						<artifactId>jsr305</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>javax.annotation</groupId>
-						<artifactId>javax.annotation-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.bouncycastle</groupId>
-						<artifactId>bcprov-ext-jdk15on</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>io.kubernetes</groupId>
-				<artifactId>client-java-api</artifactId>
-				<version>${kubernetes.client.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.kubernetes</groupId>
-				<artifactId>client-java-proto</artifactId>
-				<version>${kubernetes.client.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.sundr</groupId>
-				<artifactId>builder-annotations</artifactId>
-				<version>${sundrio.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>io.sundr</groupId>
-						<artifactId>sundr-core</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>io.sundr</groupId>
-				<artifactId>resourcecify-annotations</artifactId>
-				<version>${sundrio.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.sundr</groupId>
-				<artifactId>sundr-codegen</artifactId>
-				<version>${sundrio.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>io.sundr</groupId>
-						<artifactId>sundr-core</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>io.swagger</groupId>
-				<artifactId>swagger-annotations</artifactId>
-				<version>1.5.12</version>
-			</dependency>
-			<dependency>
-				<groupId>org.joda</groupId>
-				<artifactId>joda-convert</artifactId>
-				<version>1.2</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.logging</groupId>
-			<artifactId>jboss-logging</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>io.kubernetes</groupId>
 			<artifactId>client-java</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.logging</groupId>
+			<artifactId>jboss-logging</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -335,36 +177,6 @@
 						</formats>
 					</configuration>
 				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-enforcer-plugin</artifactId>
-					<configuration>
-						<rules>
-							<banDuplicateClasses>
-								<dependencies>
-									<dependency>
-										<groupId>io.kubernetes</groupId>
-										<artifactId>client-java</artifactId>
-										<ignoreClasses>
-											<ignoreClass>io.kubernetes.client.*</ignoreClass>
-										</ignoreClasses>
-									</dependency>
-									<dependency>
-										<groupId>io.sundr</groupId>
-										<artifactId>sundr-codegen</artifactId>
-										<ignoreClasses>
-											<ignoreClass>io.sundr.SundrException</ignoreClass>
-											<ignoreClass>io.sundr.Function</ignoreClass>
-											<ignoreClass>io.sundr.FunctionFactory</ignoreClass>
-											<ignoreClass>io.sundr.Provider</ignoreClass>
-											<ignoreClass>io.sundr.builder.*</ignoreClass>
-										</ignoreClasses>
-									</dependency>
-								</dependencies>
-							</banDuplicateClasses>
-						</rules>
-					</configuration>
-				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -379,7 +191,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-			</plugin>			
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
