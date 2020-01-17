@@ -235,7 +235,7 @@ public class KubeNamingStore
 				return new String(value, Charsets.UTF_8);
 			}
 		}
-		logger.debugv("Key ''{0}'' (context {1}) not found in secret", key, context);
+		logger.debugv("Key ''{0}'' (context {1}) not found in any secret", key, context);
 		return null;
 	}
 
