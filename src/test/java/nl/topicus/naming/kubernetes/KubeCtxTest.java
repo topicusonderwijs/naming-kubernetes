@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.Configuration;
+import io.kubernetes.client.openapi.models.V1SecretList;
 
 public class KubeCtxTest {
   private static final int PORT = 8089;
@@ -74,6 +75,15 @@ public class KubeCtxTest {
     Assert.assertEquals("value", ctx.lookup(new CompositeName("key")));
   }
 
+  @Test(expected = NamingException.class)
+  public void testMissingLookupByName() throws NamingException
+  {
+    stub(client, createConfigMap("root", Map.of()));
+    stub(client, new V1SecretList());
+    
+    ctx.lookup(new CompositeName("key"));
+  }
+
   @Test(expected = UnsupportedOperationException.class)
 	public void testBindByName() throws NamingException
 	{
@@ -119,7 +129,7 @@ public class KubeCtxTest {
 	@Test(expected = UnsupportedOperationException.class)
 	public void testRename() throws NamingException
 	{
-		ctx.rebind("old", "new");
+		ctx.rename("old", "new");
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
