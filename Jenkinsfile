@@ -9,11 +9,13 @@ node(){
 		}
 	}
 
-	publishTestReports { }
+  stage("Reports") {}
+    publishTestReports { }
 
-  publishAnalysisReports {
-    aggregate = false
-    jacoco = true
+    publishAnalysisReports {
+      aggregate = false
+      jacoco = true
+    }
   }
 
 	notify { }
