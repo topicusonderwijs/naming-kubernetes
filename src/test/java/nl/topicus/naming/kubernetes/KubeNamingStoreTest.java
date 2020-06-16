@@ -1,64 +1,319 @@
 package nl.topicus.naming.kubernetes;
 
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.Security;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Base64;
-import java.util.Hashtable;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
-import javax.naming.Context;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.security.Security;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.Map;
+
+import javax.naming.CompositeName;
 import javax.naming.NamingException;
 
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.google.common.base.Charsets;
+import com.google.common.io.ByteStreams;
+
+import io.kubernetes.client.openapi.ApiClient;
+import io.kubernetes.client.openapi.Configuration;
+import io.kubernetes.client.openapi.models.V1ConfigMap;
+import io.kubernetes.client.openapi.models.V1ConfigMapList;
+import io.kubernetes.client.openapi.models.V1ObjectMeta;
+import io.kubernetes.client.openapi.models.V1Secret;
+import io.kubernetes.client.openapi.models.V1SecretList;
+
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.Ignore;
+import org.bouncycastle.openssl.PEMParser;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class KubeNamingStoreTest
 {
-	// Werkt alleen als je kube config hebt (maw dus niet op de buildserver)
-	@Test
-	@Ignore
-	public void testSomething() throws NamingException
-	{
+	private static final int PORT = 8089;
+
+	@Rule
+	public WireMockRule wireMockRule = new WireMockRule(PORT);
+  
+  private ApiClient client;
+
+  private KubeNamingStore store;
+
+  @BeforeClass
+  public static void setup() 
+  {
 		Security.addProvider(new BouncyCastleProvider());
-		System.setProperty("org.jboss.logging.provider", "slf4j");
-		Context ctx = new KubeCtxFactory().getInitialContext(new Hashtable<String, Object>()
-		{
-			{
-				put(KubeNamingStore.CONTEXT_PROPERTY, "");
-				put(KubeNamingStore.NAMESPACE_PROPERTY, "som-build");
-			}
-		});
-		// ctx.lookup("service.deployment.config");
-		// ctx.lookup("identity.federation/idp.id");
-		// ctx.lookup("somtoday.straat");
-		// Object port = ctx.lookup("entrustservice.port");
-		// Assert.assertTrue("" + port.getClass().toString(), Integer.class.isInstance(port));
-		//
-		// Object bugsnag = ctx.lookup("bugsnag.enabled");
-		// Assert.assertTrue(Boolean.class.isInstance(bugsnag));
+    System.setProperty("org.jboss.logging.provider", "slf4j");
+  }
 
-		String crt = (String) ctx.lookup("identity.federation/idp.certificate"); // shared
-		System.out.println(crt);
+  @Before
+  public void init() 
+  {
+		client = new ApiClient();
+		client.setBasePath("http://localhost:" + PORT);
+    Configuration.setDefaultApiClient(client);
+    
+    store = new KubeNamingStore(client, new Hashtable<String, Object>()
+    {
+      private static final long serialVersionUID = 1L;
+  
+      {
+        put(KubeNamingStore.CONTEXT_PROPERTY, "");
+        put(KubeNamingStore.NAMESPACE_PROPERTY, "kube-naming");
+      }
+    });
+  }
 
-		String key = (String) ctx.lookup("identity.federation/idp.privatekey"); // authenticator
-																				// specifiek
-		System.out.println(key);
+  private V1ConfigMap createConfigMap(String name, Map<String, String> data) 
+  {
+    return createConfigMap(name, Collections.emptyMap(), data);
+  }
 
-		// key = PKCS#1 format, cobra verwacht PKCS#8 format
+  private V1ConfigMap createConfigMap(String name, Map<String, String> annotations, Map<String, String> data) 
+  {
+    return new V1ConfigMap()
+      .apiVersion("v1")
+      .kind("ConfigMap")
+      .metadata(new V1ObjectMeta()
+        .name(name)
+        .labels(Map.of(KubeNamingStore.LABEL_SELECTOR, ""))
+        .annotations(annotations))
+      .data(data);
+  }
 
-		try
-		{
-			KeyFactory factory = KeyFactory.getInstance("RSA");
-			RSAPrivateKey privKey = (RSAPrivateKey) factory
-				.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(key)));
-		}
-		catch (NoSuchAlgorithmException | InvalidKeySpecException e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
+  private V1Secret createSecret(String name, String type, Map<String, byte[]> data) 
+  {
+    return createSecret(name, type, Collections.emptyMap(), data);
+  }
+
+  private V1Secret createSecret(String name, String type, Map<String, String> annotations, Map<String, byte[]> data) 
+  {
+    return new V1Secret()
+      .apiVersion("v1")
+      .kind("Secret")
+      .metadata(new V1ObjectMeta()
+        .name(name)
+        .labels(Map.of(KubeNamingStore.LABEL_SELECTOR, ""))
+        .annotations(annotations))
+      .type(type)
+      .data(data);
+  }
+
+  private void stub(V1ConfigMap configMap) 
+  {
+    stub(new V1ConfigMapList().items(Collections.singletonList(configMap)));
+  }
+
+  private void stub(V1ConfigMapList configMapList) 
+  {
+    stubFor(get(urlPathEqualTo("/api/v1/namespaces/kube-naming/configmaps"))
+    .willReturn(aResponse().withHeader("Content-Type", "application/json")
+      .withBody(client.getJSON().serialize(configMapList))));
+  }
+
+  private void stub(V1Secret... secrets) 
+  {
+    stub(new V1SecretList().items(Arrays.asList(secrets)));
+  }
+
+  private void stub(V1SecretList secretList) 
+  {
+    stubFor(get(urlPathEqualTo("/api/v1/namespaces/kube-naming/secrets"))
+    .willReturn(aResponse().withHeader("Content-Type", "application/json")
+      .withBody(client.getJSON().serialize(secretList))));
+  }
+  
+	@Test
+	public void testJavaTypeConversions() throws NamingException
+	{
+		stub(createConfigMap("conversions", Map.of("key1", "value1", "key2", "42", "key3", "True", "key4", "false")));
+
+    Object value = store.get(new CompositeName("key1"));
+    Assert.assertEquals(String.class, value.getClass());
+    Assert.assertEquals("value1", value);
+
+    value = store.get(new CompositeName("key2"));
+    Assert.assertEquals(Integer.class, value.getClass());
+    Assert.assertEquals(42, value);
+
+    value = store.get(new CompositeName("key3"));
+    Assert.assertEquals(Boolean.class, value.getClass());
+    Assert.assertEquals(true, value);
+
+    value = store.get(new CompositeName("key4"));
+    Assert.assertEquals(Boolean.class, value.getClass());
+    Assert.assertEquals(false, value);
+  }
+
+  @Test(expected = NamingException.class)
+  public void testMissingKey() throws NamingException
+  {
+    stub(new V1ConfigMapList());
+    stub(new V1SecretList());
+
+    store.get(new CompositeName("key"));
+  }
+
+  private V1ConfigMapList createSubcontextsConfigMapList()
+  {
+    V1ConfigMap root = createConfigMap("root", Map.of("key1", "value1"));
+    V1ConfigMap sub1 = createConfigMap("sub1", Map.of(KubeNamingStore.ANNOTATION_KEY, "sub1"), Map.of("key2", "value2"));
+    V1ConfigMap sub2 = createConfigMap("sub2", Map.of(KubeNamingStore.ANNOTATION_KEY, "sub2"), Map.of("key3", "value3"));
+    
+    return new V1ConfigMapList().items(Arrays.asList(root, sub1, sub2));
+  }
+
+  @Test
+  public void testSubContextsWithConfigMap() throws NamingException
+  {
+    stub(createSubcontextsConfigMapList());
+        
+    Object value = store.get(new CompositeName("key1"));
+    Assert.assertEquals("value1", value);
+
+    value = store.get(new CompositeName("sub1/key2"));
+    Assert.assertEquals("value2", value);
+
+    value = store.get(new CompositeName("sub2/key3"));
+    Assert.assertEquals("value3", value);
+  }
+
+  @Test(expected = NamingException.class)
+  public void testMissingKeyInSubContextWithConfigMap() throws NamingException
+  {
+    stub(createSubcontextsConfigMapList());
+    stub(new V1SecretList());
+
+    store.get(new CompositeName("sub1/key3"));
+  }
+
+  @Test
+  public void testKeyFromSecret() throws NamingException
+  {
+    stub(new V1ConfigMapList());
+    stub(createSecret("my-secret", "Opaque", Map.of("key1", "secret1".getBytes(Charsets.UTF_8))));
+
+    Object value = store.get(new CompositeName("key1"));
+    Assert.assertEquals("secret1", value);
+  }
+
+  private V1SecretList createSubcontextsSecretList()
+  {
+    V1Secret root = createSecret("root", "Opaque", Map.of("key1", "secret1".getBytes(Charsets.UTF_8)));
+    V1Secret sub1 = createSecret("sub1", "Opaque", Map.of(KubeNamingStore.ANNOTATION_KEY, "sub1"), Map.of("key2", "secret2".getBytes(Charsets.UTF_8)));
+    V1Secret sub2 = createSecret("sub2", "Opaque", Map.of(KubeNamingStore.ANNOTATION_KEY, "sub2"), Map.of("key3", "secret3".getBytes(Charsets.UTF_8)));
+    
+    return new V1SecretList().items(Arrays.asList(root, sub1, sub2));
+  }
+
+  @Test
+  public void testSubContextsWithSecret() throws NamingException
+  {
+    stub(new V1ConfigMapList());
+    stub(createSubcontextsSecretList());
+        
+    Object value = store.get(new CompositeName("key1"));
+    Assert.assertEquals("secret1", value);
+
+    value = store.get(new CompositeName("sub1/key2"));
+    Assert.assertEquals("secret2", value);
+
+    value = store.get(new CompositeName("sub2/key3"));
+    Assert.assertEquals("secret3", value);
+  }
+
+  @Test
+  public void testTlsSecret() throws NamingException 
+  {
+    stub(new V1ConfigMapList());
+    stub(
+      createSecret("my-crt-secret-1", KubeNamingStore.SECRET_TLS, 
+        Map.of(KubeNamingStore.ANNOTATION_CERTIFICATE_KEY, "crt1",
+          KubeNamingStore.ANNOTATION_PRIVATEKEY_KEY, "pkey1",
+          KubeNamingStore.ANNOTATION_PRIVATEKEY_STRING, "true"),
+        Map.of("tls.crt", "certificate1".getBytes(Charsets.UTF_8),
+          "tls.key", "privatekey1".getBytes(Charsets.UTF_8))),
+      createSecret("my-crt-secret-2", KubeNamingStore.SECRET_TLS, 
+        Map.of(KubeNamingStore.ANNOTATION_CERTIFICATE_KEY, "crt2",
+          KubeNamingStore.ANNOTATION_PRIVATEKEY_KEY, "pkey2",
+          KubeNamingStore.ANNOTATION_CERTIFICATE_STRING, "true"),
+        Map.of("tls.crt", "certificate2".getBytes(Charsets.UTF_8),
+          "tls.key", "privatekey2".getBytes(Charsets.UTF_8)))
+    );
+
+    byte[] crt1 = (byte[])store.get(new CompositeName("crt1"));
+    Assert.assertArrayEquals("certificate1".getBytes(Charsets.UTF_8), crt1);
+
+    Object pkey1 = store.get(new CompositeName("pkey1"));
+    Assert.assertEquals("privatekey1", pkey1);
+
+    Object crt2 = store.get(new CompositeName("crt2"));
+    Assert.assertEquals("certificate2", crt2);
+
+    byte[] pkey2 = (byte[])store.get(new CompositeName("pkey2"));
+    Assert.assertArrayEquals("privatekey2".getBytes(Charsets.UTF_8), pkey2);
+  }
+
+  @Test(expected = NamingException.class)
+  public void testMissingCertificateKeyAnnotation() throws NamingException
+  {
+    stub(new V1ConfigMapList());
+    stub(createSecret("my-secret", KubeNamingStore.SECRET_TLS, Map.of("tls.crt", "certificate".getBytes(Charsets.UTF_8))));
+
+    store.get(new CompositeName("no-valid-secret"));
+  }
+
+  @Test(expected = NamingException.class)
+  public void testMissingPrivateKeyKeyAnnotation() throws NamingException
+  {
+    stub(new V1ConfigMapList());
+    stub(createSecret("my-secret", KubeNamingStore.SECRET_TLS,
+      Map.of(KubeNamingStore.ANNOTATION_CERTIFICATE_KEY, "crt1"),
+      Map.of("tls.key", "privatekey".getBytes(Charsets.UTF_8))));
+
+    store.get(new CompositeName("no-valid-secret"));
+  }
+
+  @Test
+  public void testPEMHeaderAndFooterRemoval() throws NamingException
+  {
+    stub(new V1ConfigMapList());
+    stub(createSecret("my-secret", KubeNamingStore.SECRET_TLS,
+      Map.of(
+        KubeNamingStore.ANNOTATION_CERTIFICATE_KEY, "crt",
+        KubeNamingStore.ANNOTATION_PRIVATEKEY_KEY, "pkey",
+        KubeNamingStore.ANNOTATION_CERTIFICATE_STRING, "true",
+        KubeNamingStore.ANNOTATION_CERTIFICATE_HEADER_FOOTER, "true"),
+      Map.of("tls.crt", String.format("%sprivatekeydata%s", KubeNamingStore.PEM_CERTIFICATE_START, KubeNamingStore.PEM_CERTIFICATE_END).getBytes(Charsets.UTF_8))));
+
+    Object value = store.get(new CompositeName("crt"));
+    Assert.assertEquals(String.class, value.getClass());
+    Assert.assertEquals("privatekeydata", value);
+  }
+
+  @Test
+  public void testPKCS8Conversion() throws IOException, NamingException
+  {
+    byte[] pkey = ByteStreams.toByteArray(KubeNamingStoreTest.class.getResourceAsStream("dummy.key"));
+    PrivateKeyInfo pkcs8Key = (PrivateKeyInfo)new PEMParser(new InputStreamReader(KubeNamingStoreTest.class.getResourceAsStream("dummy.pem"))).readObject();
+
+    stub(new V1ConfigMapList());
+    stub(createSecret("my-secret", KubeNamingStore.SECRET_TLS,
+      Map.of(
+        KubeNamingStore.ANNOTATION_CERTIFICATE_KEY, "crt",
+        KubeNamingStore.ANNOTATION_PRIVATEKEY_KEY, "pkey",
+        KubeNamingStore.ANNOTATION_PRIVATEKEY_FORMAT, "PKCS#8"),
+      Map.of("tls.key", pkey)));
+
+    byte[] value = (byte[])store.get(new CompositeName("pkey"));
+    // debug: Assert.assertEquals(new String(Base64.getEncoder().encode(pkcs8Key.getEncoded())), new String(value));
+    Assert.assertArrayEquals(Base64.getEncoder().encode(pkcs8Key.getEncoded()), value);
+  }
 }
