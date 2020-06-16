@@ -9,7 +9,7 @@ node(){
 		}
 	}
 
-  stage("Reports") {}
+  stage("Reports") {
     publishTestReports { }
 
     publishAnalysisReports {
