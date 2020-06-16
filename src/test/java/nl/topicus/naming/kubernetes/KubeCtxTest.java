@@ -7,13 +7,7 @@ import java.security.Security;
 import java.util.Hashtable;
 import java.util.Map;
 
-import javax.naming.Binding;
 import javax.naming.CompositeName;
-import javax.naming.Context;
-import javax.naming.Name;
-import javax.naming.NameClassPair;
-import javax.naming.NameParser;
-import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
