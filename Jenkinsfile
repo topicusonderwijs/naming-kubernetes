@@ -11,5 +11,10 @@ node(){
 
 	publishTestReports { }
 
+  publishAnalysisReports {
+    aggregate = false
+    jacoco = true
+  }
+
 	notify { }
 }
