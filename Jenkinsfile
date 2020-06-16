@@ -14,6 +14,7 @@ node(){
 
     publishAnalysisReports {
       aggregate = false
+      findbugs = false
       jacoco = true
     }
   }
