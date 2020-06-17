@@ -82,9 +82,7 @@ public class KubeNamingStore
 
 	static final String PEM_CERTIFICATE_END = "-----END CERTIFICATE-----";
 
-	private final ApiClient client;
-
-	private final CoreV1Api api;
+	private final CoreV1Api corev1;
 
 	private final LoadingCache<Name, Optional<Object>> values;
 
@@ -92,12 +90,11 @@ public class KubeNamingStore
 
 	private final String namespace;
 
-	public KubeNamingStore(final ApiClient client, final Hashtable<String, Object> envprops)
+	public KubeNamingStore(final Hashtable<String, Object> envprops)
 	{
-		this.client = client;
 		context = (String) envprops.getOrDefault(CONTEXT_PROPERTY, "");
 		namespace = (String) envprops.getOrDefault(NAMESPACE_PROPERTY, "default");
-		api = new CoreV1Api();
+		corev1 = new CoreV1Api();
 		values = createCache();
 	}
 
@@ -137,7 +134,7 @@ public class KubeNamingStore
 
 	private Object loadFromConfigMap(final String context, final String key) throws ApiException
 	{
-		V1ConfigMapList configMaps = api.listNamespacedConfigMap(namespace, null, null, null, null,
+		V1ConfigMapList configMaps = corev1.listNamespacedConfigMap(namespace, null, null, null, null,
 			getLabelSelector(), null, null, null, null);
 		for (V1ConfigMap configMap : configMaps.getItems())
 		{
@@ -198,7 +195,7 @@ public class KubeNamingStore
 
 	private Object loadFromSecret(final String context, final String key) throws ApiException
 	{
-		V1SecretList secrets = api.listNamespacedSecret(namespace, null, null, null, null,
+		V1SecretList secrets = corev1.listNamespacedSecret(namespace, null, null, null, null,
 			getLabelSelector(), null, null, null, null);
 		for (V1Secret secret : secrets.getItems())
 		{

@@ -33,8 +33,6 @@ public class KubeCtx implements Context, Serializable
 
   private static final Logger logger = Logger.getLogger(KubeCtx.class);
   
-  static final String APICLIENT_PROPERTY = "java.naming.kubernetes.apiclient";
-
 	private final Hashtable<String, Object> envprops;
 
 	private final KubeNamingStore store;
@@ -45,7 +43,10 @@ public class KubeCtx implements Context, Serializable
 		envprops = props != null ? (Hashtable<String, Object>) props.clone() : new Hashtable<>(0);
 		try
 		{
-			this.store = new KubeNamingStore(envprops.containsKey(APICLIENT_PROPERTY) ? (ApiClient)envprops.get(APICLIENT_PROPERTY) : createDefaultClient(), envprops);
+      if ( !Boolean.parseBoolean(System.getProperty("org.junit.test")) ) {
+        Configuration.setDefaultApiClient(Config.defaultClient());
+      }
+			this.store = new KubeNamingStore(envprops);
 		}
 		catch (Exception e)
 		{
@@ -53,12 +54,6 @@ public class KubeCtx implements Context, Serializable
 			ne.setRootCause(e);
 			throw ne;
 		}
-	}
-
-	private ApiClient createDefaultClient() throws IOException
-	{
-		Configuration.setDefaultApiClient(Config.defaultClient());
-		return Configuration.getDefaultApiClient();
 	}
 
 	@Override

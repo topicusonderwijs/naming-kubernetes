@@ -4,7 +4,6 @@ import static nl.topicus.naming.kubernetes.Utils.createConfigMap;
 import static nl.topicus.naming.kubernetes.Utils.stub;
 
 import java.security.Security;
-import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -36,6 +35,7 @@ public class KubeCtxFactoryTest {
   {
 		Security.addProvider(new BouncyCastleProvider());
     System.setProperty("org.jboss.logging.provider", "slf4j");
+    System.setProperty("org.junit.test", "true");
   }
 
   @Before
@@ -57,7 +57,6 @@ public class KubeCtxFactoryTest {
       private static final long serialVersionUID = 1L;
   
       {
-        put(KubeCtx.APICLIENT_PROPERTY, client);
         put(KubeNamingStore.CONTEXT_PROPERTY, "");
         put(KubeNamingStore.NAMESPACE_PROPERTY, "kube-naming");
       }

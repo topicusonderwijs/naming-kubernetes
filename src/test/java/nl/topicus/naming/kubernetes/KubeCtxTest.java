@@ -38,6 +38,7 @@ public class KubeCtxTest {
   {
 		Security.addProvider(new BouncyCastleProvider());
     System.setProperty("org.jboss.logging.provider", "slf4j");
+    System.setProperty("org.junit.test", "true");
   }
 
   @Before
@@ -52,7 +53,6 @@ public class KubeCtxTest {
       private static final long serialVersionUID = 1L;
   
       {
-        put(KubeCtx.APICLIENT_PROPERTY, client);
         put(KubeNamingStore.CONTEXT_PROPERTY, "");
         put(KubeNamingStore.NAMESPACE_PROPERTY, "kube-naming");
       }

@@ -58,7 +58,7 @@ public class KubeNamingStoreTest
 		client.setBasePath("http://localhost:" + PORT);
     Configuration.setDefaultApiClient(client);
     
-    store = new KubeNamingStore(client, new Hashtable<String, Object>()
+    store = new KubeNamingStore(new Hashtable<String, Object>()
     {
       private static final long serialVersionUID = 1L;
   
