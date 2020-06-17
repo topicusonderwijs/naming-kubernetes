@@ -1,18 +1,18 @@
 /**
- *    Licensed to the Apache Software Foundation (ASF) under one or more
- *    contributor license agreements.  See the NOTICE file distributed with
- *    this work for additional information regarding copyright ownership.
- *    The ASF licenses this file to You under the Apache License, Version 2.0
- *    (the "License"); you may not use this file except in compliance with
- *    the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package nl.topicus.naming.kubernetes;
 
@@ -34,7 +34,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.V1ConfigMap;
@@ -59,22 +58,18 @@ public class KubeNamingStore
 
 	static final String ANNOTATION_KEY = "k8s.naming.topicus.nl/context";
 
-	static final String ANNOTATION_CERTIFICATE_KEY =
-		"k8s.naming.topicus.nl/key_certificate";
+	static final String ANNOTATION_CERTIFICATE_KEY = "k8s.naming.topicus.nl/key_certificate";
 
-	static final String ANNOTATION_CERTIFICATE_STRING =
-		"k8s.naming.topicus.nl/certificate_string";
+	static final String ANNOTATION_CERTIFICATE_STRING = "k8s.naming.topicus.nl/certificate_string";
 
 	static final String ANNOTATION_CERTIFICATE_HEADER_FOOTER =
 		"k8s.naming.topicus.nl/certificate_remove_header_footer";
 
 	static final String ANNOTATION_PRIVATEKEY_KEY = "k8s.naming.topicus.nl/key_privatekey";
 
-	static final String ANNOTATION_PRIVATEKEY_STRING =
-		"k8s.naming.topicus.nl/privatekey_string";
+	static final String ANNOTATION_PRIVATEKEY_STRING = "k8s.naming.topicus.nl/privatekey_string";
 
-	static final String ANNOTATION_PRIVATEKEY_FORMAT =
-		"k8s.naming.topicus.nl/privatekey_format";
+	static final String ANNOTATION_PRIVATEKEY_FORMAT = "k8s.naming.topicus.nl/privatekey_format";
 
 	static final String SECRET_TLS = "kubernetes.io/tls";
 
@@ -134,8 +129,8 @@ public class KubeNamingStore
 
 	private Object loadFromConfigMap(final String context, final String key) throws ApiException
 	{
-		V1ConfigMapList configMaps = corev1.listNamespacedConfigMap(namespace, null, null, null, null,
-			getLabelSelector(), null, null, null, null);
+		V1ConfigMapList configMaps = corev1.listNamespacedConfigMap(namespace, null, null, null,
+			null, getLabelSelector(), null, null, null, null);
 		for (V1ConfigMap configMap : configMaps.getItems())
 		{
 			String ann = null;

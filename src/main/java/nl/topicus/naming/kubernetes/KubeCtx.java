@@ -1,28 +1,26 @@
 /**
- *    Licensed to the Apache Software Foundation (ASF) under one or more
- *    contributor license agreements.  See the NOTICE file distributed with
- *    this work for additional information regarding copyright ownership.
- *    The ASF licenses this file to You under the Apache License, Version 2.0
- *    (the "License"); you may not use this file except in compliance with
- *    the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package nl.topicus.naming.kubernetes;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Hashtable;
 
 import javax.naming.*;
 
-import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.util.Config;
 import org.jboss.logging.Logger;
@@ -31,8 +29,8 @@ public class KubeCtx implements Context, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-  private static final Logger logger = Logger.getLogger(KubeCtx.class);
-  
+	private static final Logger logger = Logger.getLogger(KubeCtx.class);
+
 	private final Hashtable<String, Object> envprops;
 
 	private final KubeNamingStore store;
@@ -43,9 +41,10 @@ public class KubeCtx implements Context, Serializable
 		envprops = props != null ? (Hashtable<String, Object>) props.clone() : new Hashtable<>(0);
 		try
 		{
-      if ( !Boolean.parseBoolean(System.getProperty("org.junit.test")) ) {
-        Configuration.setDefaultApiClient(Config.defaultClient());
-      }
+			if (!Boolean.parseBoolean(System.getProperty("org.junit.test")))
+			{
+				Configuration.setDefaultApiClient(Config.defaultClient());
+			}
 			this.store = new KubeNamingStore(envprops);
 		}
 		catch (Exception e)

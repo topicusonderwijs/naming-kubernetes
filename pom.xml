@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>nl.topicus.onderwijs.parent</groupId>
 		<artifactId>onderwijs-parent-base</artifactId>
 		<version>2020.5.2</version>
-		<relativePath/>
+		<relativePath />
 	</parent>
 
 	<groupId>nl.topicus</groupId>
@@ -24,9 +26,9 @@
 
 	<inceptionYear>2018</inceptionYear>
 
-  <properties>
-    <jacocoArgline/>
-  </properties>
+	<properties>
+		<jacocoArgline />
+	</properties>
 
 	<dependencyManagement>
 		<dependencies>
@@ -35,12 +37,12 @@
 				<artifactId>logging-interceptor</artifactId>
 				<version>${wildfly.version.com.squareup.okhttp3}</version>
 			</dependency>
-      <dependency>
-          <groupId>com.github.tomakehurst</groupId>
-          <artifactId>wiremock-jre8-standalone</artifactId>
-          <version>2.26.3</version>
-          <scope>test</scope>
-      </dependency>      
+			<dependency>
+				<groupId>com.github.tomakehurst</groupId>
+				<artifactId>wiremock-jre8-standalone</artifactId>
+				<version>2.26.3</version>
+				<scope>test</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -57,12 +59,12 @@
 			<groupId>org.jboss.logging</groupId>
 			<artifactId>jboss-logging</artifactId>
 		</dependency>
-    <dependency>
-        <groupId>com.github.tomakehurst</groupId>
-        <artifactId>wiremock-jre8-standalone</artifactId>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
+		<dependency>
+			<groupId>com.github.tomakehurst</groupId>
+			<artifactId>wiremock-jre8-standalone</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.jacoco</groupId>
 			<artifactId>org.jacoco.core</artifactId>
 			<scope>test</scope>
@@ -83,16 +85,31 @@
 					<version>3.0</version>
 					<configuration>
 						<header>src/main/license.txt</header>
-						<includes>
-							<include>src/main/**/*.java</include>
-						</includes>
 					</configuration>
 					<executions>
 						<execution>
+							<id>default-resources</id>
 							<phase>process-sources</phase>
 							<goals>
 								<goal>format</goal>
 							</goals>
+							<configuration>
+								<includes>
+									<include>src/main/**/*.java</include>
+								</includes>
+							</configuration>
+						</execution>
+						<execution>
+							<id>default-testResources</id>
+							<phase>process-test-resources</phase>
+							<goals>
+								<goal>format</goal>
+							</goals>
+							<configuration>
+								<includes>
+									<include>src/test/**/*.java</include>
+								</includes>
+							</configuration>
 						</execution>
 					</executions>
 				</plugin>
@@ -201,16 +218,16 @@
 					<configuration>
 						<rules>
 							<banDuplicateClasses>
-                <scopes>
-                  <scope>compile</scope>
-                  <scope>provided</scope>
-                </scopes>
+								<scopes>
+									<scope>compile</scope>
+									<scope>provided</scope>
+								</scopes>
 							</banDuplicateClasses>
 						</rules>
 						<fail>true</fail>
 					</configuration>
-				</plugin>        
-        <plugin>
+				</plugin>
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<configuration>
@@ -221,19 +238,19 @@
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>${topicus.version.org.jacoco}</version>
-          <executions>
-                <execution>
-                    <id>default-prepare-agent</id>
-                    <goals>
-                        <goal>prepare-agent</goal>
-                    </goals>
-                    <configuration>
-										  <propertyName>jacocoArgline</propertyName>
-									  </configuration>
-                </execution>
-            </executions>
-				</plugin>        
-      </plugins>
+					<executions>
+						<execution>
+							<id>default-prepare-agent</id>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+							<configuration>
+								<propertyName>jacocoArgline</propertyName>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
 		</pluginManagement>
 		<plugins>
 			<plugin>
@@ -252,10 +269,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
 			</plugin>
-      <plugin>
+			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-			</plugin>      
+			</plugin>
 		</plugins>
 	</build>
 </project>

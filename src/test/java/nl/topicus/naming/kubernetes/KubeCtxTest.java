@@ -1,7 +1,22 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package nl.topicus.naming.kubernetes;
 
-import static nl.topicus.naming.kubernetes.Utils.createConfigMap;
-import static nl.topicus.naming.kubernetes.Utils.stub;
+import static nl.topicus.naming.kubernetes.Utils.*;
 
 import java.security.Security;
 import java.util.Hashtable;
@@ -11,7 +26,9 @@ import javax.naming.CompositeName;
 import javax.naming.NamingException;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-
+import io.kubernetes.client.openapi.ApiClient;
+import io.kubernetes.client.openapi.Configuration;
+import io.kubernetes.client.openapi.models.V1SecretList;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Assert;
 import org.junit.Before;
@@ -19,72 +36,69 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 
-import io.kubernetes.client.openapi.ApiClient;
-import io.kubernetes.client.openapi.Configuration;
-import io.kubernetes.client.openapi.models.V1SecretList;
+public class KubeCtxTest
+{
+	private static final int PORT = 8089;
 
-public class KubeCtxTest {
-  private static final int PORT = 8089;
+	private ApiClient client;
 
-  private ApiClient client;
-
-  private KubeCtx ctx;
+	private KubeCtx ctx;
 
 	@Rule
-  public WireMockRule wireMockRule = new WireMockRule(PORT);
-  
-  @BeforeClass
-  public static void setup() 
-  {
-		Security.addProvider(new BouncyCastleProvider());
-    System.setProperty("org.jboss.logging.provider", "slf4j");
-    System.setProperty("org.junit.test", "true");
-  }
+	public WireMockRule wireMockRule = new WireMockRule(PORT);
 
-  @Before
-  public void init() throws NamingException
-  {
+	@BeforeClass
+	public static void setup()
+	{
+		Security.addProvider(new BouncyCastleProvider());
+		System.setProperty("org.jboss.logging.provider", "slf4j");
+		System.setProperty("org.junit.test", "true");
+	}
+
+	@Before
+	public void init() throws NamingException
+	{
 		client = new ApiClient();
 		client.setBasePath("http://localhost:" + PORT);
-    Configuration.setDefaultApiClient(client);
-    
-    ctx = new KubeCtx(new Hashtable<String, Object>()
-    {
-      private static final long serialVersionUID = 1L;
-  
-      {
-        put(KubeNamingStore.CONTEXT_PROPERTY, "");
-        put(KubeNamingStore.NAMESPACE_PROPERTY, "kube-naming");
-      }
-    });
-  }
+		Configuration.setDefaultApiClient(client);
 
-  @Test
-  public void testLookup() throws NamingException
-  {
-    stub(client, createConfigMap("root", Map.of("key", "value")));
-    
-    Assert.assertEquals("value", ctx.lookup("key"));
-  }
+		ctx = new KubeCtx(new Hashtable<String, Object>()
+		{
+			private static final long serialVersionUID = 1L;
 
-  @Test
-  public void testLookupByName() throws NamingException
-  {
-    stub(client, createConfigMap("root", Map.of("key", "value")));
-    
-    Assert.assertEquals("value", ctx.lookup(new CompositeName("key")));
-  }
+			{
+				put(KubeNamingStore.CONTEXT_PROPERTY, "");
+				put(KubeNamingStore.NAMESPACE_PROPERTY, "kube-naming");
+			}
+		});
+	}
 
-  @Test(expected = NamingException.class)
-  public void testMissingLookupByName() throws NamingException
-  {
-    stub(client, createConfigMap("root", Map.of()));
-    stub(client, new V1SecretList());
-    
-    ctx.lookup(new CompositeName("key"));
-  }
+	@Test
+	public void testLookup() throws NamingException
+	{
+		stub(client, createConfigMap("root", Map.of("key", "value")));
 
-  @Test(expected = UnsupportedOperationException.class)
+		Assert.assertEquals("value", ctx.lookup("key"));
+	}
+
+	@Test
+	public void testLookupByName() throws NamingException
+	{
+		stub(client, createConfigMap("root", Map.of("key", "value")));
+
+		Assert.assertEquals("value", ctx.lookup(new CompositeName("key")));
+	}
+
+	@Test(expected = NamingException.class)
+	public void testMissingLookupByName() throws NamingException
+	{
+		stub(client, createConfigMap("root", Map.of()));
+		stub(client, new V1SecretList());
+
+		ctx.lookup(new CompositeName("key"));
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
 	public void testBindByName() throws NamingException
 	{
 		ctx.bind(new CompositeName(""), null);
@@ -111,7 +125,7 @@ public class KubeCtxTest {
 	@Test(expected = UnsupportedOperationException.class)
 	public void testUnbindByName() throws NamingException
 	{
-	  ctx.unbind(new CompositeName(""));
+		ctx.unbind(new CompositeName(""));
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
@@ -183,7 +197,7 @@ public class KubeCtxTest {
 	@Test(expected = UnsupportedOperationException.class)
 	public void testLookupLinkByName() throws NamingException
 	{
-    ctx.lookupLink(new CompositeName("link"));
+		ctx.lookupLink(new CompositeName("link"));
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
