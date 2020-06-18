@@ -148,7 +148,7 @@ public class KubeNamingStore
 				continue;
 			}
 
-			String value = configMap.getData().get(key);
+			String value = configMap.getData() != null ? configMap.getData().get(key) : null;
 			if (value != null)
 			{
 				logger.debugv(
