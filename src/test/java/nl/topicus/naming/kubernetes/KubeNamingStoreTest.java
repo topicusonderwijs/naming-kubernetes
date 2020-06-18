@@ -113,7 +113,24 @@ public class KubeNamingStoreTest
 		stub(client, new V1SecretList());
 
 		store.get(new CompositeName("key"));
-	}
+  }
+  
+  @Test
+  public void testNoDataFromConfigMap() throws NamingException
+  {
+    stub(client, createConfigMap("empty", Map.of(), null));
+    stub(client, new V1SecretList());
+
+    try {
+      store.get(new CompositeName("foo"));
+      Assert.fail("Expected NamingException not thrown");
+    }
+    catch (NamingException e) {
+      if (! e.getMessage().equals("Key foo not found!")) {
+        throw e;
+      }
+    }
+  }
 
 	private V1ConfigMapList createSubcontextsConfigMapList()
 	{
@@ -159,7 +176,24 @@ public class KubeNamingStoreTest
 
 		Object value = store.get(new CompositeName("key1"));
 		Assert.assertEquals("secret1", value);
-	}
+  }
+  
+  @Test
+  public void testNoDataFromSecret() throws NamingException
+  {
+    stub(client, new V1ConfigMapList());
+    stub(client, createSecret("empty", "Opaque", Map.of(), null));
+
+    try {
+      store.get(new CompositeName("foo"));
+      Assert.fail("Expected NamingException not thrown");
+    }
+    catch (NamingException e) {
+      if (! e.getMessage().equals("Key foo not found!")) {
+        throw e;
+      }
+    }
+  }
 
 	private V1SecretList createSubcontextsSecretList()
 	{

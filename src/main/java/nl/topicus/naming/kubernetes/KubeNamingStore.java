@@ -148,7 +148,7 @@ public class KubeNamingStore
 				continue;
 			}
 
-			String value = configMap.getData() != null ? configMap.getData().get(key) : null;
+      String value = configMap.getData() != null ? configMap.getData().get(key) : null;
 			if (value != null)
 			{
 				logger.debugv(
@@ -221,7 +221,7 @@ public class KubeNamingStore
 				continue;
 			}
 
-			byte[] value = secret.getData().get(key);
+      byte[] value = secret.getData() != null ? secret.getData().get(key) : null;
 			if (value != null)
 			{
 				logger.debugv("Found key ''{0}'' (context ''{1}'') in secret ''{2}''", key,
