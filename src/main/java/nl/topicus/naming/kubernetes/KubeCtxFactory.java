@@ -14,12 +14,14 @@
  */
 package nl.topicus.naming.kubernetes;
 
+import java.security.Security;
 import java.util.Hashtable;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jboss.logging.Logger;
 
 public class KubeCtxFactory implements InitialContextFactory
@@ -34,6 +36,7 @@ public class KubeCtxFactory implements InitialContextFactory
 	{
 		if (initialContext == null)
 		{
+			Security.addProvider(new BouncyCastleProvider());
 			try
 			{
 				logger.info("Initializing Kubernetes naming context...");
