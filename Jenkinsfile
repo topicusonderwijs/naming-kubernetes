@@ -13,6 +13,8 @@ node(){
 
 	stage("Reports") {
 		publishTestReports { }
+		
+		publishCoverageReports { }
 
 //		publishAnalysisReports {
 //			aggregate = false
