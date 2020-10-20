@@ -11,15 +11,15 @@ node(){
 		}
 	}
 
-	stage("Reports") {
-		publishTestReports { }
+//	stage("Reports") {
+//		publishTestReports { }
 
-		publishAnalysisReports {
-			aggregate = false
-			findbugs = false
-			jacoco = true
-		}
-	}
+//		publishAnalysisReports {
+//			aggregate = false
+//			findbugs = false
+//			jacoco = true
+//		}
+//	}
 
 	notify { }
 }
