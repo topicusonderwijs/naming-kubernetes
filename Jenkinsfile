@@ -16,6 +16,8 @@ node(){
 		
 		publishCoverageReports { }
 
+		recordIssues aggregatingResults: true, tools: [spotBugs(useRankAsPriority: true)]
+		
 //		publishAnalysisReports {
 //			aggregate = false
 //			findbugs = false
