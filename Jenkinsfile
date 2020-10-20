@@ -1,3 +1,5 @@
+@Library('jenkins-pipeline-library@task-warnings-ng-plugin') _
+
 config { }
 
 node(){
@@ -9,15 +11,15 @@ node(){
 		}
 	}
 
-  stage("Reports") {
-    publishTestReports { }
+	stage("Reports") {
+		publishTestReports { }
 
-    publishAnalysisReports {
-      aggregate = false
-      findbugs = false
-      jacoco = true
-    }
-  }
+		publishAnalysisReports {
+			aggregate = false
+			findbugs = false
+			jacoco = true
+		}
+	}
 
 	notify { }
 }
