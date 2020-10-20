@@ -8,11 +8,17 @@ node(){
 	catchError {
 		maven {
 			goals = 'deploy'
+			publishIssues = false
 		}
 	}
 
-	stage("Reports") {
-		publishAnalysisIssues()
+	reportIssues(
+//		aggregatingResults
+//		java, javaDoc, junitParser
+//		jacoco
+	)
+
+//	stage("Report") {
 	
 		//publishTestReports { } // not warnings-ng-plugin
 		
@@ -25,7 +31,7 @@ node(){
 //			findbugs = false
 //			jacoco = true
 //		}
-	}
+//	}
 
 	notify { }
 }
