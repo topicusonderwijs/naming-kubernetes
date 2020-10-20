@@ -12,11 +12,11 @@ node(){
 	}
 
 	stage("Reports") {
-		publishTestReports { }
+		publishTestReports { } // not warnings-ng-plugin
 		
-		publishCoverageReports { }
+		publishCoverageReports { }  // not warnings-ng-plugin
 
-		recordIssues aggregatingResults: true, tools: [spotBugs(useRankAsPriority: true)]
+		recordIssues aggregatingResults: true, tools: [spotBugs(useRankAsPriority: true), junitParser(pattern: '**/target/surefire-reports/*.xml')]
 		
 //		publishAnalysisReports {
 //			aggregate = false
