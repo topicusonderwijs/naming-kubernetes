@@ -12,7 +12,7 @@ node(){
 	}
 
 	stage("Reports") {
-		publishAnalysisIssues
+		publishAnalysisIssues()
 	
 		//publishTestReports { } // not warnings-ng-plugin
 		
