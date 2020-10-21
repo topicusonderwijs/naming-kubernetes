@@ -13,10 +13,10 @@ node(){
 	}
 
 	reportIssues(
-//		aggregatingResults
-//		java, javaDoc, junitParser
-//		jacoco
 		profile: 'java-simple'
+		tools: [ 
+			[ tool: jacoco() ]
+		]
 
 	)
 
