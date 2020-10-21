@@ -13,7 +13,7 @@ node(){
 	}
 
 	reportIssues(
-		profile: 'java-simple'
+		profile: 'java-simple',
 		tools: [ 
 			[ tool: jacoco() ]
 		]
