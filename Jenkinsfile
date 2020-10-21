@@ -15,7 +15,7 @@ node(){
 	reportIssues(
 		profile: 'java-simple',
 		tools: [ 
-			[ tool: jacocoParser() ]
+			[ tool: groovyScript(parserId: 'jacoco') ]
 		]
 
 	)
