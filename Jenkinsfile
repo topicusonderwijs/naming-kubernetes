@@ -16,6 +16,8 @@ node(){
 //		aggregatingResults
 //		java, javaDoc, junitParser
 //		jacoco
+		profile: 'java-simple'
+
 	)
 
 //	stage("Report") {
