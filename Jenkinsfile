@@ -13,27 +13,8 @@ node(){
 	}
 
 	reportIssues(
-		profile: 'java-simple',
-		tools: [ 
-			[ tool: groovyScript(parserId: 'jacoco') ]
-		]
-
+		profile: 'java-jacoco'
 	)
-
-//	stage("Report") {
-	
-		//publishTestReports { } // not warnings-ng-plugin
-		
-		//publishCoverageReports { }  // not warnings-ng-plugin
-
-		//recordIssues aggregatingResults: true, tools: [spotBugs(useRankAsPriority: true), junitParser(pattern: '**/target/surefire-reports/*.xml')]
-		
-//		publishAnalysisReports {
-//			aggregate = false
-//			findbugs = false
-//			jacoco = true
-//		}
-//	}
 
 	notify { }
 }
