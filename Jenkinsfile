@@ -1,6 +1,6 @@
 @Library('jenkins-pipeline-library@task-warnings-ng-plugin') _
 
-config { numberToKeep=2 }
+config { }
 
 node(){
 	git.checkout { }
