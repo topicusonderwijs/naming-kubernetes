@@ -8,7 +8,6 @@ node(){
 	catchError {
 		maven {
 			goals = 'deploy'
-			publishIssues = false
 		}
 	}
 
