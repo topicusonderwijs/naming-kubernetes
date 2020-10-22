@@ -9,7 +9,7 @@ node(){
 		}
 	}
 
-	publishTestReports { }
+	reportIssues()
 
 	notify { }
 }
