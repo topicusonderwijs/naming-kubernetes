@@ -13,7 +13,7 @@ node(){
 	}
 
 	reportIssues(
-		profiles: 'java-spotbugs,java-jacoco'
+		profiles: 'java-jacoco'
 	)
 
 	notify { }
