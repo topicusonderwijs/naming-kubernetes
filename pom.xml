@@ -5,7 +5,7 @@
   <parent>
     <groupId>nl.topicus.onderwijs.parent</groupId>
     <artifactId>onderwijs-parent-base</artifactId>
-    <version>2021.7.1</version>
+    <version>2021.7.2</version>
     <relativePath/>
   </parent>
 
@@ -34,21 +34,6 @@
         <groupId>com.squareup.okhttp3</groupId>
         <artifactId>logging-interceptor</artifactId>
         <version>${wildfly.version.com.squareup.okhttp3}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.prometheus</groupId>
-        <artifactId>simpleclient_tracer_common</artifactId>
-        <version>${topicus.version.io.prometheus}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.prometheus</groupId>
-        <artifactId>simpleclient_tracer_otel</artifactId>
-        <version>${topicus.version.io.prometheus}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.prometheus</groupId>
-        <artifactId>simpleclient_tracer_otel_agent</artifactId>
-        <version>${topicus.version.io.prometheus}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
