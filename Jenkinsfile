@@ -13,5 +13,7 @@ node(){
 		profiles: 'java-jacoco'
 	)
 
-	notify { }
+	notify {
+		emailNotificationRecipients = 'Sverre.Boschman@topicus.nl'
+	}
 }
