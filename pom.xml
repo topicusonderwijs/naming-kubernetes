@@ -11,7 +11,7 @@
 
   <groupId>nl.topicus</groupId>
   <artifactId>naming-kubernetes</artifactId>
-  <version>2.2.1</version>
+  <version>2.2.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>JBoss WildFly naming module for Kubernetes</name>
@@ -27,7 +27,7 @@
   <scm>
     <url>https://github.com/topicusonderwijs/naming-kubernetes</url>
     <connection>scm:git:git@github.com:topicusonderwijs/naming-kubernetes.git</connection>
-    <tag>naming-kubernetes-2.2.1</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
