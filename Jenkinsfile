@@ -1,6 +1,6 @@
 config { }
 
-node(){
+node("build02) {
 	git.checkout { }
 
 	catchError {
