@@ -1,6 +1,6 @@
 config { }
 
-node("build02") {
+node() {
 	git.checkout { }
 
 	catchError {
@@ -14,6 +14,6 @@ node("build02") {
 	)
 
 	notify {
-		emailNotificationRecipients = 'Sverre.Boschman@topicus.nl'
+		slackChannel = "#dev-cobra"
 	}
 }
