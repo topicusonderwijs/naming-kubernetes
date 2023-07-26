@@ -5,7 +5,6 @@ node() {
 
 	catchError {
 		maven {
-			image = 'docker.topicus.education/jenkins/jenkins-maven-build:3-corretto-debian'
 			goals = 'deploy'
 		}
 	}
