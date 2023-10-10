@@ -5,7 +5,7 @@
 		<groupId>nl.topicus.onderwijs.parent</groupId>
 		<artifactId>onderwijs-parent-base</artifactId>
 		<version>2023.7.8</version>
-		<relativePath />
+		<relativePath/>
 	</parent>
 	<groupId>nl.topicus</groupId>
 	<artifactId>naming-kubernetes</artifactId>
@@ -24,7 +24,7 @@
 		<tag>HEAD</tag>
 	</scm>
 	<properties>
-		<jacocoArgline />
+		<jacocoArgline/>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
