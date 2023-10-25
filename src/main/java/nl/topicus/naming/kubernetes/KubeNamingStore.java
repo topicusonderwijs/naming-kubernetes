@@ -128,7 +128,7 @@ public class KubeNamingStore
 	private Object loadFromConfigMap(final String context, final String key) throws ApiException
 	{
 		V1ConfigMapList configMaps = corev1.listNamespacedConfigMap(namespace, null, null, null,
-			null, getLabelSelector(), null, null, null, null, null);
+			null, getLabelSelector(), null, null, null, false, null, null);
 		for (V1ConfigMap configMap : configMaps.getItems())
 		{
 			String ann = null;
@@ -189,7 +189,7 @@ public class KubeNamingStore
 	private Object loadFromSecret(final String context, final String key) throws ApiException
 	{
 		V1SecretList secrets = corev1.listNamespacedSecret(namespace, null, null, null, null,
-			getLabelSelector(), null, null, null, null, null);
+			getLabelSelector(), null, null, null, false, null, null);
 		for (V1Secret secret : secrets.getItems())
 		{
 			String ann = null;
