@@ -52,10 +52,10 @@ The values returned from Kubernetes are of the Java type `String`. JNDI values a
 
 ## Compatibility Matrix
 
-|                       | WildFly 13 | WildFly 14  |
-|-----------------------|------------|-------------|
-| naming-kubernetes 1.x | +          | +           |
-| naming-kubernetes 2.x | -          | +           |
+|                       | < WildFly 27 |  >= WildFly 27  |
+|-----------------------|--------------|-----------------|
+| naming-kubernetes 2.x | +            | -               |
+| naming-kubernetes 3.x | -            | +               |
 
 ## Examples
 The following configmap exposes the JNDI name `java://k8s/my.jndi.key` (`k8s` is the name of the external-context and has to be defined as a label on the configmap/secret):
