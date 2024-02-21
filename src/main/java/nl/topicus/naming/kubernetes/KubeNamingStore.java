@@ -27,22 +27,24 @@ import java.util.concurrent.TimeUnit;
 import javax.naming.Name;
 import javax.naming.NamingException;
 
+import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.jboss.logging.Logger;
+
 import com.google.common.base.Charsets;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.V1ConfigMap;
 import io.kubernetes.client.openapi.models.V1ConfigMapList;
 import io.kubernetes.client.openapi.models.V1Secret;
 import io.kubernetes.client.openapi.models.V1SecretList;
-import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.openssl.PEMKeyPair;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.jboss.logging.Logger;
 
 public class KubeNamingStore
 {
@@ -99,7 +101,7 @@ public class KubeNamingStore
 			.build(new CacheLoader<Name, Optional<Object>>()
 			{
 				@Override
-				public Optional<Object> load(Name name) throws Exception
+				public Optional<Object> load(Name name)
 				{
 					try
 					{
@@ -127,8 +129,7 @@ public class KubeNamingStore
 
 	private Object loadFromConfigMap(final String context, final String key) throws ApiException
 	{
-		V1ConfigMapList configMaps = corev1.listNamespacedConfigMap(namespace, null, null, null,
-			null, getLabelSelector(), null, null, null, false, null, null);
+		V1ConfigMapList configMaps = corev1.listNamespacedConfigMap(namespace).execute();
 		for (V1ConfigMap configMap : configMaps.getItems())
 		{
 			String ann = null;
@@ -188,8 +189,7 @@ public class KubeNamingStore
 
 	private Object loadFromSecret(final String context, final String key) throws ApiException
 	{
-		V1SecretList secrets = corev1.listNamespacedSecret(namespace, null, null, null, null,
-			getLabelSelector(), null, null, null, false, null, null);
+		V1SecretList secrets = corev1.listNamespacedSecret(namespace).execute();
 		for (V1Secret secret : secrets.getItems())
 		{
 			String ann = null;
@@ -322,11 +322,6 @@ public class KubeNamingStore
 		String fn = name.toString();
 		int i = fn.lastIndexOf('/');
 		return i > 0 ? fn.substring(i + 1) : fn;
-	}
-
-	private String getLabelSelector()
-	{
-		return String.format("%s in (, %s)", LABEL_SELECTOR, context);
 	}
 
 	public Object get(final Name key) throws NamingException
