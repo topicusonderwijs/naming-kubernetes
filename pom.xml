@@ -154,14 +154,6 @@
 								<artifactId>guava</artifactId>
 							</exclude>
 							<exclude>
-								<groupId>com.squareup.okhttp3</groupId>
-								<artifactId>okhttp</artifactId>
-							</exclude>
-							<exclude>
-								<groupId>com.squareup.okio</groupId>
-								<artifactId>okio</artifactId>
-							</exclude>
-							<exclude>
 								<groupId>commons-codec</groupId>
 								<artifactId>commons-codec</artifactId>
 							</exclude>
