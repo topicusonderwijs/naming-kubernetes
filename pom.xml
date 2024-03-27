@@ -51,6 +51,20 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+			<dependency>
+				<!-- Until onderwijs-parent 22024.3.1 -->
+				<groupId>com.github.jknack</groupId>
+				<artifactId>handlebars-helpers</artifactId>
+				<version>4.3.1</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<!-- Until onderwijs-parent 22024.3.1 -->
+				<groupId>org.openjdk.nashorn</groupId>
+				<artifactId>nashorn-core</artifactId>
+				<version>15.4</version>
+				<scope>test</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
@@ -86,7 +100,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<pluginManagement>
 			<plugins>
