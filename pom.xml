@@ -51,18 +51,18 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+			<!-- Tijdelijk tot OP 2024.3.3 -->
 			<dependency>
-				<!-- Until onderwijs-parent 2024.3.1 -->
-				<groupId>com.github.jknack</groupId>
-				<artifactId>handlebars-helpers</artifactId>
-				<version>4.3.1</version>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-session</artifactId>
+				<version>${topicus.version.org.eclipse.jetty}</version>
 				<scope>test</scope>
 			</dependency>
+			<!-- Tijdelijk tot OP 2024.3.3 -->
 			<dependency>
-				<!-- Until onderwijs-parent 2024.3.1 -->
-				<groupId>org.openjdk.nashorn</groupId>
-				<artifactId>nashorn-core</artifactId>
-				<version>15.4</version>
+				<groupId>org.wiremock</groupId>
+				<artifactId>wiremock-jetty12</artifactId>
+				<version>${topicus.version.org.wiremock}</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>
@@ -96,7 +96,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.wiremock</groupId>
-			<artifactId>wiremock</artifactId>
+			<artifactId>wiremock-jetty12</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
