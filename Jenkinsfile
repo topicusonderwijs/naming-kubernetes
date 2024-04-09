@@ -14,6 +14,6 @@ node() {
 	)
 
 	notify {
-		slackChannel = "#dev-cobra"
+		slackChannel = "#dev-cobra-notifications"
 	}
 }
