@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>nl.topicus.onderwijs.parent</groupId>
 		<artifactId>onderwijs-parent-base</artifactId>
-		<version>2024.4.0</version>
+		<version>2024.4.3</version>
 		<relativePath/>
 	</parent>
 	<groupId>nl.topicus</groupId>
@@ -50,20 +50,6 @@
 						<artifactId>bcprov-ext-jdk15on</artifactId>
 					</exclusion>
 				</exclusions>
-			</dependency>
-			<!-- Tijdelijk tot OP 2024.3.3 -->
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-session</artifactId>
-				<version>${topicus.version.org.eclipse.jetty}</version>
-				<scope>test</scope>
-			</dependency>
-			<!-- Tijdelijk tot OP 2024.3.3 -->
-			<dependency>
-				<groupId>org.wiremock</groupId>
-				<artifactId>wiremock-jetty12</artifactId>
-				<version>${topicus.version.org.wiremock}</version>
-				<scope>test</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
