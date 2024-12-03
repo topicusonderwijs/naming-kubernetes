@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>nl.topicus.onderwijs.parent</groupId>
 		<artifactId>onderwijs-parent-base</artifactId>
-		<version>2024.11.5</version>
+		<version>2024.12.0</version>
 		<relativePath/>
 	</parent>
 	<groupId>nl.topicus</groupId>
