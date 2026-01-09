@@ -5,11 +5,11 @@
 		<groupId>nl.topicus.onderwijs.parent</groupId>
 		<artifactId>onderwijs-parent-base</artifactId>
 		<version>2025.11.5</version>
-		<relativePath/>
+		<relativePath />
 	</parent>
 	<groupId>nl.topicus</groupId>
 	<artifactId>naming-kubernetes</artifactId>
-	<version>3.0.3-SNAPSHOT</version>
+	<version>3.0.3</version>
 	<packaging>jar</packaging>
 	<name>JBoss WildFly naming module for Kubernetes</name>
 	<description>Naming backend for WildFly using Kubernetes (configmap and secret resources).</description>
@@ -21,10 +21,10 @@
 	<scm>
 		<url>https://github.com/topicusonderwijs/naming-kubernetes</url>
 		<connection>scm:git:git@github.com:topicusonderwijs/naming-kubernetes.git</connection>
-		<tag>HEAD</tag>
+		<tag>naming-kubernetes-3.0.3</tag>
 	</scm>
 	<properties>
-		<jacocoArgline/>
+		<jacocoArgline />
 	</properties>
 	<dependencyManagement>
 		<dependencies>
