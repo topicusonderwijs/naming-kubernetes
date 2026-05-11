@@ -15,6 +15,8 @@
 package nl.topicus.naming.kubernetes;
 
 import static nl.topicus.naming.kubernetes.Utils.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.security.Security;
 import java.util.Hashtable;
@@ -23,16 +25,15 @@ import java.util.Map;
 import javax.naming.CompositeName;
 import javax.naming.NamingException;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.models.V1SecretList;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public class KubeCtxTest
 {
@@ -42,10 +43,13 @@ public class KubeCtxTest
 
 	private KubeCtx ctx;
 
-	@Rule
-	public WireMockRule wireMockRule = new WireMockRule(PORT);
+	@RegisterExtension
+	static WireMockExtension wireMockRule = WireMockExtension.newInstance()
+		.options(wireMockConfig().port(PORT))
+		.configureStaticDsl(true)
+		.build();
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup()
 	{
 		Security.addProvider(new BouncyCastleProvider());
@@ -53,7 +57,7 @@ public class KubeCtxTest
 		System.setProperty("org.junit.test", "true");
 	}
 
-	@Before
+	@BeforeEach
 	public void init() throws NamingException
 	{
 		client = new ApiClient();
@@ -76,7 +80,7 @@ public class KubeCtxTest
 	{
 		stub(client, createConfigMap("root", Map.of("key", "value")));
 
-		Assert.assertEquals("value", ctx.lookup("key"));
+		assertEquals("value", ctx.lookup("key"));
 	}
 
 	@Test
@@ -84,177 +88,184 @@ public class KubeCtxTest
 	{
 		stub(client, createConfigMap("root", Map.of("key", "value")));
 
-		Assert.assertEquals("value", ctx.lookup(new CompositeName("key")));
+		assertEquals("value", ctx.lookup(new CompositeName("key")));
 	}
 
-	@Test(expected = NamingException.class)
-	public void testMissingLookupByName() throws NamingException
+	@Test
+	public void testMissingLookupByName()
 	{
 		stub(client, createConfigMap("root", Map.of()));
 		stub(client, new V1SecretList());
 
-		ctx.lookup(new CompositeName("key"));
+		assertThrows(NamingException.class, () -> ctx.lookup(new CompositeName("key")));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testBindByName() throws NamingException
+	@Test
+	public void testBindByName()
 	{
-		ctx.bind(new CompositeName(""), null);
+		assertThrows(UnsupportedOperationException.class, () -> ctx.bind(new CompositeName(""), null));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testBind() throws NamingException
+	@Test
+	public void testBind()
 	{
-		ctx.bind("", null);
+		assertThrows(UnsupportedOperationException.class, () -> ctx.bind("", null));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testRebindByName() throws NamingException
+	@Test
+	public void testRebindByName()
 	{
-		ctx.rebind(new CompositeName(""), null);
+		assertThrows(UnsupportedOperationException.class, () -> ctx.rebind(new CompositeName(""), null));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testRebind() throws NamingException
+	@Test
+	public void testRebind()
 	{
-		ctx.rebind("", null);
+		assertThrows(UnsupportedOperationException.class, () -> ctx.rebind("", null));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testUnbindByName() throws NamingException
+	@Test
+	public void testUnbindByName()
 	{
-		ctx.unbind(new CompositeName(""));
+		assertThrows(UnsupportedOperationException.class, () -> ctx.unbind(new CompositeName("")));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testUnbind() throws NamingException
+	@Test
+	public void testUnbind()
 	{
-		ctx.unbind("");
+		assertThrows(UnsupportedOperationException.class, () -> ctx.unbind(""));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testRenameByName() throws NamingException
+	@Test
+	public void testRenameByName()
 	{
-		ctx.rename(new CompositeName("old"), new CompositeName("new"));
+		assertThrows(UnsupportedOperationException.class,
+			() -> ctx.rename(new CompositeName("old"), new CompositeName("new")));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testRename() throws NamingException
+	@Test
+	public void testRename()
 	{
-		ctx.rename("old", "new");
+		assertThrows(UnsupportedOperationException.class, () -> ctx.rename("old", "new"));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testListByName() throws NamingException
+	@Test
+	public void testListByName()
 	{
-		ctx.list(new CompositeName("list"));
+		assertThrows(UnsupportedOperationException.class, () -> ctx.list(new CompositeName("list")));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testList() throws NamingException
+	@Test
+	public void testList()
 	{
-		ctx.list("list");
+		assertThrows(UnsupportedOperationException.class, () -> ctx.list("list"));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testListBindingsByName() throws NamingException
+	@Test
+	public void testListBindingsByName()
 	{
-		ctx.listBindings(new CompositeName("binding"));
+		assertThrows(UnsupportedOperationException.class,
+			() -> ctx.listBindings(new CompositeName("binding")));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testListBindings() throws NamingException
+	@Test
+	public void testListBindings()
 	{
-		ctx.listBindings("binding");
+		assertThrows(UnsupportedOperationException.class, () -> ctx.listBindings("binding"));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testDestroySubcontextByName() throws NamingException
+	@Test
+	public void testDestroySubcontextByName()
 	{
-		ctx.destroySubcontext(new CompositeName("subcontext"));
+		assertThrows(UnsupportedOperationException.class,
+			() -> ctx.destroySubcontext(new CompositeName("subcontext")));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testDestroySubcontext() throws NamingException
+	@Test
+	public void testDestroySubcontext()
 	{
-		ctx.destroySubcontext("subcontext");
+		assertThrows(UnsupportedOperationException.class, () -> ctx.destroySubcontext("subcontext"));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testCreateSubcontextByName() throws NamingException
+	@Test
+	public void testCreateSubcontextByName()
 	{
-		ctx.createSubcontext(new CompositeName("subcontext"));
+		assertThrows(UnsupportedOperationException.class,
+			() -> ctx.createSubcontext(new CompositeName("subcontext")));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testCreateSubcontext() throws NamingException
+	@Test
+	public void testCreateSubcontext()
 	{
-		ctx.createSubcontext("subcontext");
+		assertThrows(UnsupportedOperationException.class, () -> ctx.createSubcontext("subcontext"));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testLookupLinkByName() throws NamingException
+	@Test
+	public void testLookupLinkByName()
 	{
-		ctx.lookupLink(new CompositeName("link"));
+		assertThrows(UnsupportedOperationException.class,
+			() -> ctx.lookupLink(new CompositeName("link")));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testLookupLink() throws NamingException
+	@Test
+	public void testLookupLink()
 	{
-		ctx.lookupLink("link");
+		assertThrows(UnsupportedOperationException.class, () -> ctx.lookupLink("link"));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testGetNameParserByName() throws NamingException
+	@Test
+	public void testGetNameParserByName()
 	{
-		ctx.getNameParser(new CompositeName("parser"));
+		assertThrows(UnsupportedOperationException.class,
+			() -> ctx.getNameParser(new CompositeName("parser")));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testGetNameParser() throws NamingException
+	@Test
+	public void testGetNameParser()
 	{
-		ctx.getNameParser("parser");
+		assertThrows(UnsupportedOperationException.class, () -> ctx.getNameParser("parser"));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testComposeNameByName() throws NamingException
+	@Test
+	public void testComposeNameByName()
 	{
-		ctx.composeName(new CompositeName("name"), new CompositeName("prefix"));
+		assertThrows(UnsupportedOperationException.class,
+			() -> ctx.composeName(new CompositeName("name"), new CompositeName("prefix")));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testComposeName() throws NamingException
+	@Test
+	public void testComposeName()
 	{
-		ctx.composeName("name", "prefix");
+		assertThrows(UnsupportedOperationException.class, () -> ctx.composeName("name", "prefix"));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testAddToEnvironment() throws NamingException
+	@Test
+	public void testAddToEnvironment()
 	{
-		ctx.addToEnvironment("prop", "val");
+		assertThrows(UnsupportedOperationException.class, () -> ctx.addToEnvironment("prop", "val"));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testRemoveFromEnvironment() throws NamingException
+	@Test
+	public void testRemoveFromEnvironment()
 	{
-		ctx.removeFromEnvironment("prop");
+		assertThrows(UnsupportedOperationException.class, () -> ctx.removeFromEnvironment("prop"));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testGetEnvironment() throws NamingException
+	@Test
+	public void testGetEnvironment()
 	{
-		ctx.getEnvironment();
+		assertThrows(UnsupportedOperationException.class, () -> ctx.getEnvironment());
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testClose() throws NamingException
+	@Test
+	public void testClose()
 	{
-		ctx.close();
+		assertThrows(UnsupportedOperationException.class, () -> ctx.close());
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void testGetNameInNamespace() throws NamingException
+	@Test
+	public void testGetNameInNamespace()
 	{
-		ctx.getNameInNamespace();
+		assertThrows(UnsupportedOperationException.class, () -> ctx.getNameInNamespace());
 	}
 }

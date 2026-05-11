@@ -15,6 +15,8 @@
 package nl.topicus.naming.kubernetes;
 
 import static nl.topicus.naming.kubernetes.Utils.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,7 +29,7 @@ import java.util.Map;
 import javax.naming.CompositeName;
 import javax.naming.NamingException;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.google.common.base.Charsets;
 import com.google.common.io.ByteStreams;
 import io.kubernetes.client.openapi.ApiClient;
@@ -39,31 +41,33 @@ import io.kubernetes.client.openapi.models.V1SecretList;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public class KubeNamingStoreTest
 {
 	private static final int PORT = 8089;
 
-	@Rule
-	public WireMockRule wireMockRule = new WireMockRule(PORT);
+	@RegisterExtension
+	static WireMockExtension wireMockRule = WireMockExtension.newInstance()
+		.options(wireMockConfig().port(PORT))
+		.configureStaticDsl(true)
+		.build();
 
 	private ApiClient client;
 
 	private KubeNamingStore store;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup()
 	{
 		Security.addProvider(new BouncyCastleProvider());
 		System.setProperty("org.jboss.logging.provider", "slf4j");
 	}
 
-	@Before
+	@BeforeEach
 	public void init()
 	{
 		client = new ApiClient();
@@ -88,47 +92,41 @@ public class KubeNamingStoreTest
 			Map.of("key1", "value1", "key2", "42", "key3", "True", "key4", "false")));
 
 		Object value = store.get(new CompositeName("key1"));
-		Assert.assertEquals(String.class, value.getClass());
-		Assert.assertEquals("value1", value);
+		assertEquals(String.class, value.getClass());
+		assertEquals("value1", value);
 
 		value = store.get(new CompositeName("key2"));
-		Assert.assertEquals(Integer.class, value.getClass());
-		Assert.assertEquals(42, value);
+		assertEquals(Integer.class, value.getClass());
+		assertEquals(42, value);
 
 		value = store.get(new CompositeName("key3"));
-		Assert.assertEquals(Boolean.class, value.getClass());
-		Assert.assertEquals(true, value);
+		assertEquals(Boolean.class, value.getClass());
+		assertEquals(true, value);
 
 		value = store.get(new CompositeName("key4"));
-		Assert.assertEquals(Boolean.class, value.getClass());
-		Assert.assertEquals(false, value);
+		assertEquals(Boolean.class, value.getClass());
+		assertEquals(false, value);
 	}
 
-	@Test(expected = NamingException.class)
-	public void testMissingKey() throws NamingException
+	@Test
+	public void testMissingKey()
 	{
 		stub(client, new V1ConfigMapList());
 		stub(client, new V1SecretList());
 
-		store.get(new CompositeName("key"));
-  }
-  
-  @Test
-  public void testNoDataFromConfigMap() throws NamingException
-  {
-    stub(client, createConfigMap("empty", Map.of(), null));
-    stub(client, new V1SecretList());
+		assertThrows(NamingException.class, () -> store.get(new CompositeName("key")));
+	}
 
-    try {
-      store.get(new CompositeName("foo"));
-      Assert.fail("Expected NamingException not thrown");
-    }
-    catch (NamingException e) {
-      if (! e.getMessage().equals("Key foo not found!")) {
-        throw e;
-      }
-    }
-  }
+	@Test
+	public void testNoDataFromConfigMap()
+	{
+		stub(client, createConfigMap("empty", Map.of(), null));
+		stub(client, new V1SecretList());
+
+		NamingException e = assertThrows(NamingException.class,
+			() -> store.get(new CompositeName("foo")));
+		assertEquals("Key foo not found!", e.getMessage());
+	}
 
 	private V1ConfigMapList createSubcontextsConfigMapList()
 	{
@@ -147,22 +145,22 @@ public class KubeNamingStoreTest
 		stub(client, createSubcontextsConfigMapList());
 
 		Object value = store.get(new CompositeName("key1"));
-		Assert.assertEquals("value1", value);
+		assertEquals("value1", value);
 
 		value = store.get(new CompositeName("sub1/key2"));
-		Assert.assertEquals("value2", value);
+		assertEquals("value2", value);
 
 		value = store.get(new CompositeName("sub2/key3"));
-		Assert.assertEquals("value3", value);
+		assertEquals("value3", value);
 	}
 
-	@Test(expected = NamingException.class)
-	public void testMissingKeyInSubContextWithConfigMap() throws NamingException
+	@Test
+	public void testMissingKeyInSubContextWithConfigMap()
 	{
 		stub(client, createSubcontextsConfigMapList());
 		stub(client, new V1SecretList());
 
-		store.get(new CompositeName("sub1/key3"));
+		assertThrows(NamingException.class, () -> store.get(new CompositeName("sub1/key3")));
 	}
 
 	@Test
@@ -173,25 +171,19 @@ public class KubeNamingStoreTest
 			Map.of("key1", "secret1".getBytes(Charsets.UTF_8))));
 
 		Object value = store.get(new CompositeName("key1"));
-		Assert.assertEquals("secret1", value);
-  }
-  
-  @Test
-  public void testNoDataFromSecret() throws NamingException
-  {
-    stub(client, new V1ConfigMapList());
-    stub(client, createSecret("empty", "Opaque", Map.of(), null));
+		assertEquals("secret1", value);
+	}
 
-    try {
-      store.get(new CompositeName("foo"));
-      Assert.fail("Expected NamingException not thrown");
-    }
-    catch (NamingException e) {
-      if (! e.getMessage().equals("Key foo not found!")) {
-        throw e;
-      }
-    }
-  }
+	@Test
+	public void testNoDataFromSecret()
+	{
+		stub(client, new V1ConfigMapList());
+		stub(client, createSecret("empty", "Opaque", Map.of(), null));
+
+		NamingException e = assertThrows(NamingException.class,
+			() -> store.get(new CompositeName("foo")));
+		assertEquals("Key foo not found!", e.getMessage());
+	}
 
 	private V1SecretList createSubcontextsSecretList()
 	{
@@ -214,13 +206,13 @@ public class KubeNamingStoreTest
 		stub(client, createSubcontextsSecretList());
 
 		Object value = store.get(new CompositeName("key1"));
-		Assert.assertEquals("secret1", value);
+		assertEquals("secret1", value);
 
 		value = store.get(new CompositeName("sub1/key2"));
-		Assert.assertEquals("secret2", value);
+		assertEquals("secret2", value);
 
 		value = store.get(new CompositeName("sub2/key3"));
-		Assert.assertEquals("secret3", value);
+		assertEquals("secret3", value);
 	}
 
 	@Test
@@ -242,30 +234,30 @@ public class KubeNamingStoreTest
 					"privatekey2".getBytes(Charsets.UTF_8))));
 
 		byte[] crt1 = (byte[]) store.get(new CompositeName("crt1"));
-		Assert.assertArrayEquals("certificate1".getBytes(Charsets.UTF_8), crt1);
+		assertArrayEquals("certificate1".getBytes(Charsets.UTF_8), crt1);
 
 		Object pkey1 = store.get(new CompositeName("pkey1"));
-		Assert.assertEquals("privatekey1", pkey1);
+		assertEquals("privatekey1", pkey1);
 
 		Object crt2 = store.get(new CompositeName("crt2"));
-		Assert.assertEquals("certificate2", crt2);
+		assertEquals("certificate2", crt2);
 
 		byte[] pkey2 = (byte[]) store.get(new CompositeName("pkey2"));
-		Assert.assertArrayEquals("privatekey2".getBytes(Charsets.UTF_8), pkey2);
+		assertArrayEquals("privatekey2".getBytes(Charsets.UTF_8), pkey2);
 	}
 
-	@Test(expected = NamingException.class)
-	public void testMissingCertificateKeyAnnotation() throws NamingException
+	@Test
+	public void testMissingCertificateKeyAnnotation()
 	{
 		stub(client, new V1ConfigMapList());
 		stub(client, createSecret("my-secret", KubeNamingStore.SECRET_TLS,
 			Map.of("tls.crt", "certificate".getBytes(Charsets.UTF_8))));
 
-		store.get(new CompositeName("no-valid-secret"));
+		assertThrows(NamingException.class, () -> store.get(new CompositeName("no-valid-secret")));
 	}
 
-	@Test(expected = NamingException.class)
-	public void testMissingPrivateKeyKeyAnnotation() throws NamingException
+	@Test
+	public void testMissingPrivateKeyKeyAnnotation()
 	{
 		stub(client, new V1ConfigMapList());
 		stub(client,
@@ -273,7 +265,7 @@ public class KubeNamingStoreTest
 				Map.of(KubeNamingStore.ANNOTATION_CERTIFICATE_KEY, "crt1"),
 				Map.of("tls.key", "privatekey".getBytes(Charsets.UTF_8))));
 
-		store.get(new CompositeName("no-valid-secret"));
+		assertThrows(NamingException.class, () -> store.get(new CompositeName("no-valid-secret")));
 	}
 
 	@Test
@@ -293,8 +285,8 @@ public class KubeNamingStoreTest
 						.getBytes(Charsets.UTF_8))));
 
 		Object value = store.get(new CompositeName("crt"));
-		Assert.assertEquals(String.class, value.getClass());
-		Assert.assertEquals("privatekeydata", value);
+		assertEquals(String.class, value.getClass());
+		assertEquals("privatekeydata", value);
 	}
 
 	@Test
@@ -314,8 +306,6 @@ public class KubeNamingStoreTest
 			Map.of("tls.key", pkey)));
 
 		byte[] value = (byte[]) store.get(new CompositeName("pkey"));
-		// debug: Assert.assertEquals(new String(Base64.getEncoder().encode(pkcs8Key.getEncoded())),
-		// new String(value));
-		Assert.assertArrayEquals(Base64.getEncoder().encode(pkcs8Key.getEncoded()), value);
+		assertArrayEquals(Base64.getEncoder().encode(pkcs8Key.getEncoded()), value);
 	}
 }

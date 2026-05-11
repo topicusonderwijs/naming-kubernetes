@@ -15,6 +15,8 @@
 package nl.topicus.naming.kubernetes;
 
 import static nl.topicus.naming.kubernetes.Utils.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.security.Security;
 import java.util.Hashtable;
@@ -23,15 +25,14 @@ import java.util.Map;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.Configuration;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public class KubeCtxFactoryTest
 {
@@ -39,10 +40,13 @@ public class KubeCtxFactoryTest
 
 	private ApiClient client;
 
-	@Rule
-	public WireMockRule wireMockRule = new WireMockRule(PORT);
+	@RegisterExtension
+	static WireMockExtension wireMockRule = WireMockExtension.newInstance()
+		.options(wireMockConfig().port(PORT))
+		.configureStaticDsl(true)
+		.build();
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup()
 	{
 		Security.addProvider(new BouncyCastleProvider());
@@ -50,7 +54,7 @@ public class KubeCtxFactoryTest
 		System.setProperty("org.junit.test", "true");
 	}
 
-	@Before
+	@BeforeEach
 	public void init()
 	{
 		client = new ApiClient();
@@ -73,11 +77,11 @@ public class KubeCtxFactoryTest
 				put(KubeNamingStore.NAMESPACE_PROPERTY, "kube-naming");
 			}
 		});
-		Assert.assertNotNull(ctx1);
+		assertNotNull(ctx1);
 
 		Context ctx2 = factory.getInitialContext(new Hashtable<>());
-		Assert.assertEquals(ctx1, ctx2);
+		assertEquals(ctx1, ctx2);
 
-		Assert.assertEquals("value", ctx1.lookup("key"));
+		assertEquals("value", ctx1.lookup("key"));
 	}
 }
