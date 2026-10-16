@@ -15,6 +15,7 @@
 package nl.topicus.naming.kubernetes;
 
 import static nl.topicus.naming.kubernetes.Utils.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,12 +26,15 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.naming.CompositeName;
 import javax.naming.NamingException;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.google.common.base.Charsets;
+import com.google.common.base.Ticker;
 import com.google.common.io.ByteStreams;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.Configuration;
@@ -74,7 +78,12 @@ public class KubeNamingStoreTest
 		client.setBasePath("http://localhost:" + PORT);
 		Configuration.setDefaultApiClient(client);
 
-		store = new KubeNamingStore(new Hashtable<String, Object>()
+		store = new KubeNamingStore(storeProperties());
+	}
+
+	private Hashtable<String, Object> storeProperties()
+	{
+		return new Hashtable<>()
 		{
 			private static final long serialVersionUID = 1L;
 
@@ -82,7 +91,7 @@ public class KubeNamingStoreTest
 				put(KubeNamingStore.CONTEXT_PROPERTY, "");
 				put(KubeNamingStore.NAMESPACE_PROPERTY, "kube-naming");
 			}
-		});
+		};
 	}
 
 	@Test
@@ -126,6 +135,45 @@ public class KubeNamingStoreTest
 		NamingException e = assertThrows(NamingException.class,
 			() -> store.get(new CompositeName("foo")));
 		assertEquals("Key foo not found!", e.getMessage());
+	}
+
+	private void stubApiFailure()
+	{
+		stubFor(get(urlPathMatching("/api/v1/namespaces/kube-naming/(configmaps|secrets)"))
+			.willReturn(aResponse().withStatus(500)));
+	}
+
+	@Test
+	public void testApiFailureIsNotCached() throws NamingException
+	{
+		stubApiFailure();
+
+		assertThrows(NamingException.class, () -> store.get(new CompositeName("key1")));
+
+		stub(client, createConfigMap("recovered", Map.of("key1", "value1")));
+
+		assertEquals("value1", store.get(new CompositeName("key1")));
+	}
+
+	@Test
+	public void testFailedRefreshKeepsPreviousValue() throws NamingException
+	{
+		AtomicLong nanos = new AtomicLong();
+		store = new KubeNamingStore(storeProperties(), new Ticker()
+		{
+			@Override
+			public long read()
+			{
+				return nanos.get();
+			}
+		});
+		stub(client, createConfigMap("config", Map.of("key1", "value1")));
+		assertEquals("value1", store.get(new CompositeName("key1")));
+
+		stubApiFailure();
+		nanos.addAndGet(TimeUnit.MINUTES.toNanos(16));
+
+		assertEquals("value1", store.get(new CompositeName("key1")));
 	}
 
 	private V1ConfigMapList createSubcontextsConfigMapList()

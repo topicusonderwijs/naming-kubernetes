@@ -28,6 +28,7 @@ import javax.naming.Name;
 import javax.naming.NamingException;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Ticker;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -85,32 +86,29 @@ public class KubeNamingStore
 
 	public KubeNamingStore(final Hashtable<String, Object> envprops)
 	{
+		this(envprops, Ticker.systemTicker());
+	}
+
+	KubeNamingStore(final Hashtable<String, Object> envprops, final Ticker ticker)
+	{
 		context = (String) envprops.getOrDefault(CONTEXT_PROPERTY, "");
 		namespace = (String) envprops.getOrDefault(NAMESPACE_PROPERTY, "default");
 		corev1 = new CoreV1Api();
-		values = createCache();
+		values = createCache(ticker);
 	}
 
-	private LoadingCache<Name, Optional<Object>> createCache()
+	private LoadingCache<Name, Optional<Object>> createCache(final Ticker ticker)
 	{
 		return CacheBuilder.newBuilder()
+			.ticker(ticker)
 			.expireAfterWrite(Duration.ofHours(24))
 			.refreshAfterWrite(Duration.ofMinutes(15))
-			.build(new CacheLoader<Name, Optional<Object>>()
+			.build(new CacheLoader<>()
 			{
 				@Override
-				public Optional<Object> load(Name name)
+				public Optional<Object> load(Name name) throws ApiException
 				{
-					try
-					{
-						return Optional.ofNullable(loadInternal(name));
-					}
-					catch (ApiException e)
-					{
-						logger.errorv(e, "Failed to call Kubernetes API for ''{0}''!",
-							name.toString());
-						return Optional.empty();
-					}
+					return Optional.ofNullable(loadInternal(name));
 				}
 			});
 		// TODO : async refresh / k8s watch
