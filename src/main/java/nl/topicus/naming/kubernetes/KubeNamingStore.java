@@ -18,11 +18,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.KeyPair;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Hashtable;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import javax.naming.Name;
 import javax.naming.NamingException;
@@ -96,8 +96,8 @@ public class KubeNamingStore
 	private LoadingCache<Name, Optional<Object>> createCache()
 	{
 		return CacheBuilder.newBuilder()
-			.expireAfterWrite(24, TimeUnit.HOURS)
-			.refreshAfterWrite(15, TimeUnit.MINUTES)
+			.expireAfterWrite(Duration.ofHours(24))
+			.refreshAfterWrite(Duration.ofMinutes(15))
 			.build(new CacheLoader<Name, Optional<Object>>()
 			{
 				@Override
