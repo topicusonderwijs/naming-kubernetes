@@ -18,33 +18,32 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.KeyPair;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Hashtable;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import javax.naming.Name;
 import javax.naming.NamingException;
 
-import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.openssl.PEMKeyPair;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.jboss.logging.Logger;
-
 import com.google.common.base.Charsets;
+import com.google.common.base.Ticker;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.V1ConfigMap;
 import io.kubernetes.client.openapi.models.V1ConfigMapList;
 import io.kubernetes.client.openapi.models.V1Secret;
 import io.kubernetes.client.openapi.models.V1SecretList;
+import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.jboss.logging.Logger;
 
 public class KubeNamingStore
 {
@@ -87,32 +86,29 @@ public class KubeNamingStore
 
 	public KubeNamingStore(final Hashtable<String, Object> envprops)
 	{
+		this(envprops, Ticker.systemTicker());
+	}
+
+	KubeNamingStore(final Hashtable<String, Object> envprops, final Ticker ticker)
+	{
 		context = (String) envprops.getOrDefault(CONTEXT_PROPERTY, "");
 		namespace = (String) envprops.getOrDefault(NAMESPACE_PROPERTY, "default");
 		corev1 = new CoreV1Api();
-		values = createCache();
+		values = createCache(ticker);
 	}
 
-	private LoadingCache<Name, Optional<Object>> createCache()
+	private LoadingCache<Name, Optional<Object>> createCache(final Ticker ticker)
 	{
 		return CacheBuilder.newBuilder()
-			.expireAfterWrite(24, TimeUnit.HOURS)
-			.refreshAfterWrite(15, TimeUnit.MINUTES)
-			.build(new CacheLoader<Name, Optional<Object>>()
+			.ticker(ticker)
+			.expireAfterWrite(Duration.ofHours(24))
+			.refreshAfterWrite(Duration.ofMinutes(15))
+			.build(new CacheLoader<>()
 			{
 				@Override
-				public Optional<Object> load(Name name)
+				public Optional<Object> load(Name name) throws ApiException
 				{
-					try
-					{
-						return Optional.ofNullable(loadInternal(name));
-					}
-					catch (ApiException e)
-					{
-						logger.errorv(e, "Failed to call Kubernetes API for ''{0}''!",
-							name.toString());
-						return Optional.empty();
-					}
+					return Optional.ofNullable(loadInternal(name));
 				}
 			});
 		// TODO : async refresh / k8s watch
