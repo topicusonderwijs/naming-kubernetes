@@ -84,4 +84,9 @@ metadata:
   name: ConfigMapSubContextExample
 data:
   my.jndi.key: "naming-kubernetes-sample-value"
-``` 
+```
+
+## Releasing
+
+To release, ensure you have write permissions on the main branch. You may need to be a member of the `onderwijs-parent` Github group for this.
+First, run `mvn release:prepare` and verify/change the new release version, corresponding tag and new development version. Afterwards, run `mvn release:perform`.
